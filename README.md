@@ -9,22 +9,40 @@
 
 ## Текущий статус
 
-Подготовлены организационный каркас, принятые игровые правила и концепция v0.4.
-Добавлены [вымышленные входные данные](data/demo/README.md): 25 городов по 50 агентов,
-32 950 договоров в двух полных снимках; есть воспроизводимый генератор и тесты данных.
-Приложение, зависимости, интеграции, сборка и CI ещё не реализованы.
-Команд запуска приложения пока нет. Полное ТЗ и контракты интеграции не согласованы.
+Реализован [локальный питч-прототип E01](docs/features/E01-pitch-prototype/FEATURE.md):
+страна → город → улица, дома/парковки, продажи, расторжения и демонстрационные часы.
+Используются [вымышленные входные данные](data/demo/README.md): 25 городов по 50 агентов,
+32 950 договоров. Состояние сохраняется в PostgreSQL; Redis не является источником истины.
+Полный сценарий проверен через настоящий API и Chromium, включая рестарт backend.
+Это не корпоративный MVP: нет Keycloak, Kafka, реального источника и production-security.
+Переключение демо-персоны/роли не является аутентификацией. CI пока не настроен.
+
+## Запуск питча
+
+Из корня репозитория, нужен Docker с Compose:
+
+```sh
+docker compose -p vsk-pitch --env-file infra/pitch.env.example -f infra/pitch.compose.yaml up -d --build
+```
+
+Открыть `http://localhost:5188` в desktop-браузере с шириной от 1100 px.
+Backend health: `http://localhost:5189/health`. PostgreSQL/Redis не публикуют host-порты.
+Все сервисы/volumes изолированы проектом `vsk-pitch`; данные сохраняются после restart/stop.
+Стенд только localhost, только синтетические данные — не публиковать в интернет.
+
+[Сценарий показа и остановка](docs/PITCH.md) · [Скриншоты](docs/pitch/screenshots/02-city.png) ·
+[Проверки и ревью](docs/reviews/E01-pitch-review.md)
 
 ## Структура
 
 | Каталог | Назначение |
 | --- | --- |
 | [docs](docs/README.md) | Концепция, требования, архитектура, этапы и шаблоны |
-| [src/frontend](src/frontend/README.md) | Будущий Angular + TypeScript + PixiJS клиент |
-| [src/backend](src/backend/README.md) | Будущий ASP.NET Core / C# backend |
+| [src/frontend](src/frontend/README.md) | Angular + TypeScript + PixiJS клиент питча |
+| [src/backend](src/backend/README.md) | ASP.NET Core / C# ядро, API и PostgreSQL/Redis питча |
 | [contracts](contracts/README.md) | Будущие API, Kafka и scene-контракты |
 | [assets](assets/README.md) | Графические ресурсы и правила их подготовки |
-| [infra](infra/README.md) | Будущая инфраструктура локального запуска и развёртывания |
+| [infra](infra/README.md) | Изолированный Docker Compose питча; корпоративный deploy отдельно |
 | [tests](tests/README.md) | Межмодульные, интеграционные и сквозные проверки |
 | [scripts](scripts/README.md) | Генератор вымышленных входных данных |
 | [data/demo](data/demo/README.md) | Готовые тестовые справочники и полные снимки договоров |
@@ -48,7 +66,8 @@ PostgreSQL, Redis, Kafka, Keycloak. Backend — отдельный Docker-обр
 экземпляры stateless; PostgreSQL хранит состояние, Redis — восстанавливаемый кеш.
 При необходимости постоянного хранения файлов — S3/MinIO.
 Обязательные ограничения: [корпоративные требования](docs/architecture/CORPORATE-REQUIREMENTS.md).
-Версии инструментов будут зафиксированы при создании исполняемых проектов.
+Версии прототипа закреплены в frontend lockfile, C# project и Dockerfile;
+производственное разбиение и контракты интеграции ещё требуют проработки.
 
 ## Безопасность
 

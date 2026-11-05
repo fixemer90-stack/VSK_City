@@ -1,0 +1,53 @@
+{
+  "capturedAt": "2026-11-05T20:43:25.931093+00:00",
+  "scope": "localhost synthetic pitch only; not production acceptance",
+  "health": {
+    "status": "healthy",
+    "postgres": "up",
+    "redis": "up"
+  },
+  "initialWorldRestored": true,
+  "worldVersion": 158,
+  "seedCounts": {
+    "cities": 25,
+    "streets": 1250,
+    "houses": 4175,
+    "motorContribution": 28775
+  },
+  "playwrightLastRun": {
+    "status": "passed",
+    "failedTests": []
+  },
+  "actualRestartEvidence": {
+    "verified": true,
+    "agentId": "TEST-AGENT-025-001",
+    "streetId": "STREET-TEST-AGENT-025-001",
+    "versionBefore": 157,
+    "versionAfter": 157,
+    "pending": [
+      {
+        "id": "STREET-TEST-AGENT-025-001-HOUSE-00000001",
+        "lotIndex": 0,
+        "xp": 1,
+        "tier": 1,
+        "floors": 2,
+        "status": "pending_demolition",
+        "demolishAt": "2026-11-07T20:41:37.5288148+00:00"
+      }
+    ],
+    "restartOutput": " Container vsk-pitch-backend-1 Restarting \n Container vsk-pitch-backend-1 Started \n"
+  },
+  "runningImages": {
+    "/vsk-pitch-backend-1": "sha256:778f32db54e549047f788473137661511eeb1daffd3f8a32670a0e2c75d28800",
+    "/vsk-pitch-frontend-1": "sha256:944e841348bf9152382a93c1b250b6d0cf30c5fbe04f79bade02c37fc19af7cf"
+  },
+  "workingTreeRuntimeSha256": {
+    "src/backend/Engine.cs": "c56c134adb4c28d39d109db3871a6a992935985ff8e20b90793a69a8e44fd0eb",
+    "src/backend/DemoWorld.cs": "87ad3183b75e96b66d8947aa3fc86e0250e2f75d8c73ac22372f6577c156a540",
+    "src/backend/WorldStore.cs": "5ced9e67891e6ac17783d52a6f01f0d96a31143d3c6fbe54c4d0df73ed326164",
+    "src/backend/Program.cs": "3948963c2890032ce8842dd4b043f6431895ca83c64947065edd33e88f06614d",
+    "src/frontend/app/model.ts": "e2d97fd1cdb90a8ae72a84483e5129de676aa3c0f709a06cf586034849d4116b",
+    "src/frontend/app/scene.ts": "e1910fda15bb3739c53364ef6fdc6ecbab96d64ac2fe1888ee67d2e83e22ce26",
+    "src/frontend/app/app.html": "75fed896e01a5d157cde3e4775ad690ca226eac125c9fd87577c5c45bc98d31e"
+  }
+}

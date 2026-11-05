@@ -1,13 +1,26 @@
-# Инфраструктура
+# Инфраструктура локального питча
 
-Место для будущих Compose-манифестов, образцов конфигурации и deployment-документов.
-Работающих контейнеров, конфигурации Keycloak и CI пока нет.
+Рабочий стенд E01: отдельные backend/frontend образы, PostgreSQL и Redis в изолированном
+Compose-проекте vsk-pitch. Это localhost-only демонстрация на вымышленных данных,
+не корпоративное или публичное развёртывание.
 
-Локальный PoC должен обходиться вымышленными данными без корпоративных интеграций.
-Для MVP планируются PostgreSQL, Redis, Kafka и Keycloak.
-Обязательные [корпоративные требования](../docs/architecture/CORPORATE-REQUIREMENTS.md):
-отдельный Docker-образ backend, настройки через env, stateless-экземпляры;
-при постоянном хранении файлов — S3/MinIO. PostgreSQL/Redis — внешние зависимости образа.
-Dockerfile, Compose и runtime-проверки этих требований ещё не реализованы.
-Версии образов, порты и команды будут определены при реализации.
-Секреты не коммитить; будущие `.env.example` должны содержать только безопасные значения.
+Из корня репозитория:
+
+```sh
+docker compose -p vsk-pitch --env-file infra/pitch.env.example -f infra/pitch.compose.yaml up -d --build
+```
+
+Frontend: `http://localhost:5188`, backend health: `http://localhost:5189/health`.
+PostgreSQL/Redis не публикуют host-порты. Volumes имеют префикс vsk-pitch и сохраняют мир.
+Обычная остановка — `stop`, не `down -v`. Секреты реальных окружений не коммитить:
+`pitch.env.example` содержит только явно тестовые параметры.
+
+[Как показывать и останавливать](../docs/PITCH.md) ·
+[Backend: env и проверки](../src/backend/README.md) ·
+[Обязательные корпоративные ограничения](../docs/architecture/CORPORATE-REQUIREMENTS.md).
+
+Настройки приложения — env, экземпляры stateless, состояние/идемпотентность/сроки сноса —
+PostgreSQL; Redis — восстанавливаемый version-cache. S3/MinIO потребуется при появлении
+постоянных файловых загрузок/экспортов; в E01 такого сценария нет.
+Kafka, Keycloak, registry/deploy pipeline, резервное копирование и production-hardening
+остаются будущей работой. CI пока не настроен.

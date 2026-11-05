@@ -31,7 +31,8 @@
 PostgreSQL и Redis; при постоянном хранении файлов — S3 Object Storage / MinIO.
 Состояние мира и сроки сноса не хранятся только в процессе или на локальном диске.
 Полные требования и будущая приёмка:
-[CR-01–CR-05](architecture/CORPORATE-REQUIREMENTS.md). Реализация ещё отсутствует.
+[CR-01–CR-05](architecture/CORPORATE-REQUIREMENTS.md). Базовый Docker/env/stateless/PG/Redis
+срез работает в [E01](features/E01-pitch-prototype/FEATURE.md); полная корпоративная приёмка не закрыта.
 
 ## Требуют согласования
 
