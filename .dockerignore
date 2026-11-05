@@ -1,0 +1,13 @@
+**/bin
+**/obj
+**/node_modules
+**/.angular
+**/dist
+.git
+.hermes
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.pfx
+**/__pycache__
