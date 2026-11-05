@@ -1,0 +1,16 @@
+{
+  "synthetic": true,
+  "schemaVersion": "demo-draft-1",
+  "phase": "initial",
+  "snapshotAt": "2026-11-03T09:00:00Z",
+  "demoDateZero": "2026-01-01T00:00:00Z",
+  "counts": {
+    "cities": 25,
+    "channels": 75,
+    "agents": 1250,
+    "products": 2,
+    "contracts": 32950,
+    "scenarios": 1250
+  },
+  "warning": "Вымышленные данные; не схема корпоративного источника и не оценка нагрузки."
+}

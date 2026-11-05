@@ -29,6 +29,12 @@ TestResults/
 .DS_Store
 Thumbs.db
 
+# Python helper caches
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+
 # Local runtime data
 *.log
 *.db
