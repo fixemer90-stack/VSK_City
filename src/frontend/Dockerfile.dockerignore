@@ -1,0 +1,8 @@
+**
+!src/
+!src/frontend/
+!src/frontend/**
+src/frontend/node_modules/
+src/frontend/.angular/
+src/frontend/dist/
+src/frontend/out-tsc/
