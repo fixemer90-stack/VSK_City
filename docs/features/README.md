@@ -2,6 +2,10 @@
 
 Продуктовые Features пока не созданы и не начаты.
 
+Декомпозиция должна опираться на [принятые игровые правила](../GAME-RULES.md),
+[концепцию v0.4](../concept/Insurance_City_Concept_Architecture_v0.4.md) и
+[дорожную карту](../ROADMAP.md). Наличие согласованных правил не закрывает ни одну Story.
+
 Для каждой Feature создать `E01-<slug>/FEATURE.md`, а рядом — атомарные
 `S01-<slug>.md`, `S02-<slug>.md` по [шаблонам](../templates/README.md).
 
