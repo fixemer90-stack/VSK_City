@@ -8,6 +8,19 @@ const floors=[1,3,4,5,6,9,12,14,17,25];
 const houseIds=floors.flatMap((_,i)=>['a','b'].map(v=>`house-${String(i+1).padStart(2,'0')}-${v}`));
 const nonHouse=['parking-01','parking-02','parking-03','parking-04','center-moscow','center-vladivostok','center-generic','tree-broadleaf','tree-conifer','shrub','grass','vacant-lot','road-straight','road-crossing','sidewalk'];
 const json=async path=>JSON.parse(await readFile(new URL(path,root),'utf8'));
+test('parking sources use the four user vectors with a shared lot footprint',async()=>{
+ const spec=await json('scripts/sprite-spec.json');
+ const parking=spec.filter(e=>e.group==='parking');assert.equal(parking.length,4);
+ for(const item of parking){
+  assert.equal(item.sourceFile,`parking/${item.id}.svg`);
+  const svg=await readFile(new URL(`src/frontend/public/sprites/source/${item.sourceFile}`,root),'utf8');
+  assert.match(svg,/viewBox="0 0 1024 770"/);
+  assert.equal(item.width,1024);assert.equal(item.height,770);assert.equal(item.pixelRatio,2);
+  assert.equal(item.anchorX,514);assert.equal(item.anchorY,440);
+  assert.ok(item.worldPerSourcePixel>=0.14&&item.worldPerSourcePixel<=0.15);
+  assert.equal(item.worldPerSourcePixel,parking[0].worldPerSourcePixel);
+ }
+});
 test('exports exact 35 IDs with all 20 literal sources, native raster resolution and source identity',async()=>{
  const spec=await json('scripts/sprite-spec.json');
  assert.deepEqual(spec.map(e=>e.id).sort(),[...houseIds,...nonHouse].sort());
