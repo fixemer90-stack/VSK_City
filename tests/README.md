@@ -15,7 +15,7 @@ python3 -m unittest discover -s tests -p 'test_demo_data.py' -v
 повторяемость, защита перезаписи и побайтное совпадение с [готовыми CSV](../data/demo/README.md).
 Это проверки входных данных, не движка.
 
-## C# ядро — 17 assertions
+## C# ядро — 18 assertions
 
 ```sh
 docker build -f src/backend/Dockerfile --target test -t vsk-pitch-backend-tests:local .
@@ -39,7 +39,7 @@ PITCH_URL=http://127.0.0.1:5189 python3 -m unittest discover -s tests/backend -p
 в отдельной БД vsk_pitch для проверки фонового сноса. Не запускать во время питча
 или параллельно с browser smoke. Volumes и исходные CSV не удаляются.
 
-## Frontend — 24 unit/component проверок
+## Frontend — 26 unit/component проверок
 
 Из src/frontend: `npm ci`, `npm test`, `npm run typecheck`, `npm run build`.
 Для медленного WSL/NTFS можно использовать те же исходники внутри build-stage:
@@ -53,7 +53,7 @@ docker run --rm --network none --entrypoint npm -w /app vsk-pitch-frontend-build
 Проверки охватывают стабильную геометрию и центральную площадь, transport receiver,
 таймауты/отмену, pending/requestId и гонку GET/POST, захват/освобождение указателя.
 
-## Настоящий браузер/API — 5 сценариев E01 + 4 read-only проверки карты/спрайтов
+## Настоящий браузер/API — 5 исторических сценариев E01 + 6 read-only проверок правил/карты/спрайтов
 
 [Инструкция и ограничения](pitch-browser/README.md). Проверяются реальные маршруты,
 прямые клики по Pixi-карте и доступная DOM-навигация, продажи/снос, роли, размеры desktop,
@@ -63,6 +63,8 @@ docker run --rm --network none --entrypoint npm -w /app vsk-pitch-frontend-build
 
 [Результаты, исправления и пределы проверки](../docs/reviews/E01-pitch-review.md).
 Свежий визуальный срез: [карта и центры](../docs/reviews/MAP-CENTERS-review.md).
-Графические ресурсы и пользовательские дома: [спрайты](../docs/reviews/SPRITES-review.md).
+Новая шкала и парные пользовательские дома: [приёмка](../docs/reviews/TEN-TIERS-review.md).
+Экспортёр отдельно: `node --test tests/scripts/sprite-export-contract.test.mjs` из корня,
+один реальный Chromium сценарий, пишет PNG/manifest/catalog, но не состояние мира.
 Будущие продуктовые проверки должны расширять охват по [правилам](../docs/GAME-RULES.md),
 не подменять отсутствующие корпоративные гарантии удачным синтетическим демо.

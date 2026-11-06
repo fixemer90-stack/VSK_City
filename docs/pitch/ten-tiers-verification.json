@@ -1,0 +1,107 @@
+{
+  "capturedAt": "2026-11-06T16:15:19.012679+00:00",
+  "thresholds": [
+    0,
+    11,
+    22,
+    33,
+    44,
+    56,
+    67,
+    78,
+    89,
+    100
+  ],
+  "floors": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    9,
+    12,
+    14,
+    17,
+    25
+  ],
+  "capacityXp": 100,
+  "rulesVersion": 2,
+  "worldVersionBefore": 716,
+  "worldVersionAfter": 716,
+  "worldRawSha256Before": "391a1d964b1e1ef736b604db00163626da9504e3bf624837302bdab67637cdb7",
+  "worldRawSha256After": "391a1d964b1e1ef736b604db00163626da9504e3bf624837302bdab67637cdb7",
+  "worldByteIdentical": true,
+  "postgresRedisContainerIdsUnchanged": true,
+  "worldResetPerformed": false,
+  "projectedHousesChecked": 4202,
+  "activeSprites": 35,
+  "userSourceSha256": {
+    "house/IC_L01_A.svg": "2820ae9f85d7a0a8cbad7070a8f4221deef124d6f6f10f7f028fb343f3a2c958",
+    "house/IC_L01_B.svg": "e164504254fc85ac6c300d5f471ee849e14299efced004f6bbb25890d9c5e002",
+    "house/IC_L03_A.svg": "42f24fcd05bcb8c9fffebb00fd8ede5dea05bb1631e56f2507694da365cda160",
+    "house/IC_L03_B.svg": "76e3cd83dcb15111ea88078a312b153efd66eced5144f18d2ad21c6fc2ccdf31",
+    "house/IC_L04_A.svg": "a375dfe5e2bc656c5fa117a9ba0484e63d3b1276e8867c8c78733524db54b83c",
+    "house/IC_L04_B.svg": "62dd976efaa87f07c305f5a8594822f56cf013df34b321d2b36f399231d4a5ee",
+    "house/IC_L05_A.svg": "e74bbeea2f50122cf2ac0844704c07bcbef583a08554bd2af044f13d17e85861",
+    "house/IC_L05_B.svg": "36b1a874d31dd90520d9a2b3e74baa5938996ed1800aed3431506d461eb32c59",
+    "house/IC_L06_A.svg": "cd24048156ada339e2eab250d6efbd17b38586e2f21ddc0122d350510fd4ece7",
+    "house/IC_L06_B.svg": "e53ed9b7b753d287a5bb0c0d16a6103ca37e0b30a814031942c028e3c853abab",
+    "house/IC_L09_A.svg": "da13c8d86fe640a60d88809175c055bbc68e94405f6470859ff8023b64196743",
+    "house/IC_L09_B.svg": "2b4e66a884797dd65af153424561cd4ab302f138a0ef27a537826358441be088",
+    "house/IC_L12_A.svg": "30ec5ab49f0d54049884240a64eec9bb18d88021688734d30fe24fddf205dd51",
+    "house/IC_L12_B.svg": "0f20955b14c7c664e3380fa426e02e82d54be7ec58dd82650dabf6aaf1a856fb",
+    "house/IC_L14_A.svg": "05e8db7f0ddbb8187296746eb3f20048fedc8f1db0e64ae3cf7ca58e96d9b3c2",
+    "house/IC_L14_B.svg": "5a0e26908d6c1ef07aa7d142a8380611229d4500e89efefe6de299133de4b1d4",
+    "house/IC_L17_A.svg": "dadbcff0ea898c483de68acfbb7128e48f03486e018b4cd823dfa754fdc328cc",
+    "house/IC_L17_B.svg": "56623328597deeda0704cf25457aed2cc78218f4a597741ccee077af4db74ea7",
+    "house/IC_L25_A.svg": "ecb43c6fe1faafb6cd20fef8a8706311ac723d5f5fb3a91a598c9e08025e09b8",
+    "house/IC_L25_B.svg": "614508caeed8a4bdc94e40eed935e5e6cb048541c068b069bcaa580c7aa02a0c"
+  },
+  "nonhouseEntriesIdenticalToPreviousPack": true,
+  "playwrightReadOnlyCases": 6,
+  "playwrightResult": {
+    "status": "passed",
+    "failedTests": []
+  },
+  "backendAssertions": 18,
+  "frontendAssertions": 26,
+  "exporterAssertions": 1,
+  "sourceSha256": {
+    "src/backend/Engine.cs": "fe74d43154c6d3ee4236908f16de89d45b522d2338aa8c2ff858a021446b75a2",
+    "src/backend/DemoWorld.cs": "9ee926d23b5c29b0190642181cf019319f5d13e20bd9ee2fa565ccc4e3eb9e41",
+    "src/frontend/app/scene.ts": "531c1b70fc0dbfc775a383a036fb2c9eef04c479a30c3d7ad46e919363dd5476",
+    "src/frontend/app/sprite-pack.ts": "84925cba957c31ba9500e669e9f2861c8fcd3375d11ca3fc946da26c522a1dcd",
+    "src/frontend/app/model.ts": "35ede10152860e0140efc6b3bdf8a7aa9ef779783e0e4932c411ac564784c6a4",
+    "src/frontend/app/app.ts": "ba1e552ff924ba351b4b5abeb63b2b5521ad0021a011ff306ae0f018a2ed5e22",
+    "scripts/export-sprites.mjs": "6c5aed701a589629394513b370b04bdcab5f1fd12d079361a60bf6188ae175de",
+    "scripts/sprite-spec.json": "1f756fd16a6f896e937a3538226f66a82e4a4e7671f6ab8310fedb2196e77214"
+  },
+  "runtimeImages": {
+    "vsk-pitch-backend-1": "sha256:fb81802ef25580b3885246a6bc48d39d54fe76f47a30921f0ff8d98b513592a9",
+    "vsk-pitch-frontend-1": "sha256:cf3d31eed57d21daaee95361588e3f5fb2e1a94faa853a0a1f624be5909aa523"
+  },
+  "screenshots": [
+    "15-ten-tier-catalog.png",
+    "16-ten-tier-large-street.png",
+    "17-ten-tier-city.png",
+    "18-ten-tier-max.png"
+  ],
+  "finalVerificationAt": "2026-11-06T16:29:33.662989+00:00",
+  "independentReview": {
+    "passed": true,
+    "security_concerns": [],
+    "logic_errors": [],
+    "suggestionCatalogCaption": "fixed; exporter/build/6readonlycases rerun"
+  },
+  "laterConcurrentOperations": {
+    "observedWorldVersion": 1065,
+    "newReceiptTypesSinceRollout": {
+      "motor": 339,
+      "property": 6,
+      "terminate-motor": 3,
+      "advance-day": 1
+    },
+    "worldWasNotRestoredToRolloutSnapshot": true
+  },
+  "finalApiHouseCountChecked": 4208
+}
