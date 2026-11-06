@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-11-06T05:26:03.875377+00:00",
+  "scope": "visual-only update; live world not reset or restored",
+  "worldBefore": {
+    "version": 158,
+    "houses": 4175,
+    "parkingSpaces": 3825,
+    "xp": 24950
+  },
+  "worldAfterObservation": {
+    "version": 197,
+    "houses": 4180,
+    "parkingSpaces": 3802,
+    "xp": 25007
+  },
+  "worldChangedDuringWork": true,
+  "preservationMethod": "No reset, restore, backend restart or database write performed; read-only browser tests assert zero outgoing POST requests. Concurrent world changes are retained, not overwritten to force baseline equality.",
+  "backendPostgresRedisContainersUnchanged": true,
+  "playwrightReadonlySuite": {
+    "status": "passed",
+    "failedTests": []
+  },
+  "frontendImage": "sha256:5b0b8c46198aa67fb6bf84f1a80589d0c9956f0537cefa9386db4b2a0da38c2b",
+  "sourceSha256": {
+    "src/frontend/app/scene.ts": "75ee5bdd2992e9607cdd1f7a0468e8d208b0faffc16b592260e50850e8c55ce9",
+    "src/frontend/app/country-geometry.ts": "3fbd761f54497cd49dce7ce01a416a8a204404f5a2b5c12ac38c6093e8f123e3",
+    "src/frontend/app/country-data.ts": "6f670d554eb2d980ed3491f1e1efa2ac839dabc64bda45f351f071f8b1b5353c",
+    "src/frontend/app/city-landmarks.ts": "cf298c21d49565c262474ebd323f27648623d28d31f04faf01e18993a536c770",
+    "src/frontend/app/app.html": "cd6438080a395222d973c0eaa03caabaa80d14632bfe7cc541c0eecacbbd56cf"
+  },
+  "screenshots": [
+    "08-russia-geographic.png",
+    "09-moscow-center.png",
+    "10-vladivostok-center.png"
+  ]
+}
