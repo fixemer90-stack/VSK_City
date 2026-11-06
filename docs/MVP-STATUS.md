@@ -12,7 +12,7 @@
 | PostgreSQL / Redis | Реальное сохранение в JSONB под row-lock; восстанавливаемый Redis version-cache |
 | Инфраструктура | Отдельные Docker-образы и Compose vsk-pitch, localhost5188/5189, собственные volumes |
 | Вымышленные данные | 25 городов × 50 агентов, 32 950 договоров, воспроизводимый генератор |
-| Проверки E01 | Базовая приёмка: 17 C#, 14 frontend, 10 HTTP/runtime, 5 Playwright, 5 Python fixture tests; свежая итерация: 18 backend, 26 frontend, 1 exporter и 6 read-only browser |
+| Проверки E01 | Базовая приёмка: 17 C#, 14 frontend, 10 HTTP/runtime, 5 Playwright, 5 Python fixture tests; текущие проверки: 18 backend, 26 frontend, 2 exporter и 7 read-only browser |
 | Графика | Географическая основа России и 35 спрайтов: 10 ступеней домов A/B, парковки, среда, три центра (Москва/Владивосток/общий) |
 | Настоящая авторизация | Нет Keycloak; demo-персона и роли не являются безопасной аутентификацией |
 | Корпоративный источник / Kafka | Не подключены, реальный маппинг/порядок/исправления не согласованы |

@@ -1,0 +1,133 @@
+{
+  "capturedAt": "2026-11-06T17:08:11.104619+00:00",
+  "baselineCommit": "37131f635c6aaf5598eedf4af68370c554990357",
+  "scope": "fourparkingartworks only; rules/backend/world unchanged",
+  "inputSha256": {
+    "parking-01.svg": "890798d983e03d01da5a5a06b0d96254b8253a54c981ef5619b430b2ab6e61e8",
+    "parking-02.svg": "23419839c6dbfcbd2bda72ff0223382c0483edce99e96393f33fe26ad94bd77e",
+    "parking-03.svg": "a6a5754d9ced80c32293e4fc3181e6ab2ca03569541dc8c3ea34f112b92075b8",
+    "parking-04.svg": "247b1a1340533cb1b5cc4c56a5a74076480fdc943decd3161d4535c0cc92a9a0"
+  },
+  "parkingEntries": [
+    {
+      "id": "parking-01",
+      "title": "Почти свободная",
+      "group": "parking",
+      "sourceFile": "parking/parking-01.svg",
+      "file": "parking-01.png?v=53f1b02ab2dc",
+      "width": 1838,
+      "height": 1321,
+      "anchorX": 0.49891186071817195,
+      "anchorY": 0.5518546555639667,
+      "sourceCrop": {
+        "left": 111,
+        "top": 151,
+        "width": 1838,
+        "height": 1321
+      },
+      "paintedPixels": 1459107,
+      "worldScale": 0.07330415,
+      "pixelRatio": 2,
+      "sha256": "53f1b02ab2dcc9cc485c393f11d1621c0d0b18146b960cf494c17247c8dd482c",
+      "sourceSha256": "890798d983e03d01da5a5a06b0d96254b8253a54c981ef5619b430b2ab6e61e8"
+    },
+    {
+      "id": "parking-02",
+      "title": "Наполовину занята",
+      "group": "parking",
+      "sourceFile": "parking/parking-02.svg",
+      "file": "parking-02.png?v=d57f6f3ceeec",
+      "width": 1838,
+      "height": 1313,
+      "anchorX": 0.49891186071817195,
+      "anchorY": 0.5491241431835491,
+      "sourceCrop": {
+        "left": 111,
+        "top": 159,
+        "width": 1838,
+        "height": 1313
+      },
+      "paintedPixels": 1589572,
+      "worldScale": 0.07330415,
+      "pixelRatio": 2,
+      "sha256": "d57f6f3ceeec3751388af27c43d134b012d20c677178902861b367d005737500",
+      "sourceSha256": "23419839c6dbfcbd2bda72ff0223382c0483edce99e96393f33fe26ad94bd77e"
+    },
+    {
+      "id": "parking-03",
+      "title": "Почти заполненная",
+      "group": "parking",
+      "sourceFile": "parking/parking-03.svg",
+      "file": "parking-03.png?v=8fa85742caca",
+      "width": 1838,
+      "height": 1313,
+      "anchorX": 0.49891186071817195,
+      "anchorY": 0.5491241431835491,
+      "sourceCrop": {
+        "left": 111,
+        "top": 159,
+        "width": 1838,
+        "height": 1313
+      },
+      "paintedPixels": 1586677,
+      "worldScale": 0.07330415,
+      "pixelRatio": 2,
+      "sha256": "8fa85742caca643b26d30262e2dc29b33cb68733029f5afa665b4c6851ca11c8",
+      "sourceSha256": "a6a5754d9ced80c32293e4fc3181e6ab2ca03569541dc8c3ea34f112b92075b8"
+    },
+    {
+      "id": "parking-04",
+      "title": "Полная парковка",
+      "group": "parking",
+      "sourceFile": "parking/parking-04.svg",
+      "file": "parking-04.png?v=8bed79eb91ca",
+      "width": 1838,
+      "height": 1321,
+      "anchorX": 0.49891186071817195,
+      "anchorY": 0.5518546555639667,
+      "sourceCrop": {
+        "left": 111,
+        "top": 151,
+        "width": 1838,
+        "height": 1321
+      },
+      "paintedPixels": 1459107,
+      "worldScale": 0.07330415,
+      "pixelRatio": 2,
+      "sha256": "8bed79eb91cabf41aa2a1fcd63e6b1d5809b33dc9a636668a6206f6e01522690",
+      "sourceSha256": "247b1a1340533cb1b5cc4c56a5a74076480fdc943decd3161d4535c0cc92a9a0"
+    }
+  ],
+  "unchangedOtherEntries": 31,
+  "frontendUnitTests": 26,
+  "exporterTests": 2,
+  "readonlyBrowserTests": 7,
+  "playwrightResult": {
+    "status": "passed",
+    "failedTests": []
+  },
+  "worldVersionBefore": 1516,
+  "worldVersionAfter": 1516,
+  "worldRawByteIdenticalDuringVerification": true,
+  "worldBeforeSha256": "4ad6d0eae81426ed6508a2b36952d4717eabbcef906adfe3704350e443a2c29a",
+  "worldAfterSha256": "4ad6d0eae81426ed6508a2b36952d4717eabbcef906adfe3704350e443a2c29a",
+  "preservedContainers": {
+    "vsk-pitch-postgres-1": "96cfc229cf257772d390fb1a691b6f8be54eabbc1679d8b7d0b6cd17e4bb6f32",
+    "vsk-pitch-redis-1": "976527456a24788e9bfa5c9c6b12824dff5c8d1102f53c22cb0f58a921803621",
+    "vsk-pitch-backend-1": "6ffed6fed7f3d4bba07e7a2239d42d0249b5191caba7eb60276f8edda43c3c25"
+  },
+  "frontendImage": "sha256:0a147a4d02578d09ff37c138515a396b0326c120a35b12ecc48a48871ce4ef25",
+  "buildContext": "isolated git archive HEAD plus only requested parking inputs/spec, excludes pending user house edits",
+  "screenshots": {
+    "docs/pitch/screenshots/parking-catalog.png": "25ce6f00f9b9266bef8663ef76981b8de8cf786b92e8a5a5034bbea62fa19543",
+    "docs/pitch/screenshots/parking-street.png": "5ad86c10804bea7b2a63f64f9f785d9de5a9a927b1598d2c29a42f83185508bd",
+    "docs/pitch/screenshots/parking-city.png": "47998fa2313c1155b35ec51f849a745e6d92d0aa111a2d3a6965b2400884f83d"
+  },
+  "independentReview": {
+    "passed": true,
+    "security_concerns": [],
+    "logic_errors": [],
+    "nonBlockingSuggestions": "optional exact-ID/XML test strengthening; stages2/3 are catalog-only, not claimed live"
+  },
+  "windowsHostManifestVerified": true
+}

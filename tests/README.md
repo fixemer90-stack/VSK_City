@@ -53,7 +53,7 @@ docker run --rm --network none --entrypoint npm -w /app vsk-pitch-frontend-build
 Проверки охватывают стабильную геометрию и центральную площадь, transport receiver,
 таймауты/отмену, pending/requestId и гонку GET/POST, захват/освобождение указателя.
 
-## Настоящий браузер/API — 5 исторических сценариев E01 + 6 read-only проверок правил/карты/спрайтов
+## Настоящий браузер/API — 5 исторических сценариев E01 + 7 read-only проверок правил/карты/спрайтов
 
 [Инструкция и ограничения](pitch-browser/README.md). Проверяются реальные маршруты,
 прямые клики по Pixi-карте и доступная DOM-навигация, продажи/снос, роли, размеры desktop,
@@ -64,7 +64,9 @@ docker run --rm --network none --entrypoint npm -w /app vsk-pitch-frontend-build
 [Результаты, исправления и пределы проверки](../docs/reviews/E01-pitch-review.md).
 Свежий визуальный срез: [карта и центры](../docs/reviews/MAP-CENTERS-review.md).
 Новая шкала и парные пользовательские дома: [приёмка](../docs/reviews/TEN-TIERS-review.md).
+Пользовательские парковки: [приёмка](../docs/reviews/PARKING-review.md).
 Экспортёр отдельно: `node --test tests/scripts/sprite-export-contract.test.mjs` из корня,
-один реальный Chromium сценарий, пишет PNG/manifest/catalog, но не состояние мира.
+два контракта, включая настоящий Chromium export; пишет PNG/manifest/catalog, но не состояние мира.
+При параллельных правках несогласованных исходников запускать полный export в изолированном снимке.
 Будущие продуктовые проверки должны расширять охват по [правилам](../docs/GAME-RULES.md),
 не подменять отсутствующие корпоративные гарантии удачным синтетическим демо.
