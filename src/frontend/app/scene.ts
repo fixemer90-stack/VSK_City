@@ -1,14 +1,17 @@
 import {AfterViewInit,Component,ElementRef,EventEmitter,Input,OnChanges,OnDestroy,Output,ViewChild,signal} from '@angular/core';
-import {Application,Container,Graphics,Text,Rectangle} from 'pixi.js';
+import {Application,Container,Graphics,Text,Rectangle,Circle} from 'pixi.js';
 import {City,Street,House,lotPosition,cityBlockPosition} from './model';
+import {COUNTRY_RINGS,cityPoint,LABEL_CITIES} from './country-geometry';
+import {drawCityLandmark,landmarkKind,landmarkName} from './city-landmarks';
 export type SceneKind='country'|'city'|'street';
-@Component({selector:'vsk-scene',standalone:true,template:`<div #surface class="pixi-surface" data-testid="scene-surface" [attr.data-ready]="ready()" role="img" [attr.aria-label]="description" tabindex="0" (keydown)="keyboard($event)"></div><div class="scene-tools" aria-label="Управление видом"><button (click)="zoom(1.2)" aria-label="Приблизить">＋</button><button (click)="zoom(1/1.2)" aria-label="Отдалить">−</button><button (click)="fit()" aria-label="Показать всю сцену">↗</button></div>@if(error()){<div class="render-error" role="alert">{{error()}} <button (click)="initialize()">Повторить</button></div>}`})
+@Component({selector:'vsk-scene',standalone:true,styles:[`.landmark-caption{position:absolute;top:64px;left:26px;z-index:2;pointer-events:none;padding:9px 14px;border:1px solid #dce1d7;border-radius:8px;background:rgba(248,247,240,.94);color:#456274;font-size:13px;font-weight:600;box-shadow:0 4px 15px #28463808}`],template:`<div #surface class="pixi-surface" data-testid="scene-surface" [attr.data-ready]="ready()" role="img" [attr.aria-label]="description" tabindex="0" (keydown)="keyboard($event)"></div><div class="scene-tools" aria-label="Управление видом"><button (click)="zoom(1.2)" aria-label="Приблизить">＋</button><button (click)="zoom(1/1.2)" aria-label="Отдалить">−</button><button (click)="fit()" aria-label="Показать всю сцену">↗</button></div>@if(kind==='city'){<div class="landmark-caption" data-testid="landmark-caption">{{centerName}}</div>}@if(error()){<div class="render-error" role="alert">{{error()}} <button (click)="initialize()">Повторить</button></div>}`})
 export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  @ViewChild('surface',{static:true}) surface!:ElementRef<HTMLDivElement>;
  @Input() kind:SceneKind='street';@Input() cities:City[]=[];@Input() city?:City;@Input() street?:Street;
  @Output() citySelect=new EventEmitter<City>();@Output() streetSelect=new EventEmitter<Street>();
  ready=signal(false);error=signal('');private app?:Application;private root=new Container();private observer?:ResizeObserver;private dead=false;private dragging=false;private pointerId:number|null=null;private captureTarget?:Element;private moved=false;private last={x:0,y:0};private key='';private initing=false;
- get description(){return this.kind==='country'?'Стилизованная карта России. Выбор городов доступен в списке.':'Изометрическая застройка. Стрелки — перемещение, плюс и минус — масштаб. Доступный список объектов находится рядом.';}
+ get centerName(){return landmarkName(this.city);}
+ get description(){return this.kind==='country'?'Карта России на географической основе. Выбор городов доступен в списке.':this.kind==='city'?`${this.city?.name??'Город'}. Постоянный центр: ${this.centerName}. Улицы доступны на карте и в списке.`:'Изометрическая застройка. Стрелки — перемещение, плюс и минус — масштаб. Доступный список объектов находится рядом.';}
  ngAfterViewInit(){void this.initialize();}ngOnChanges(){this.draw();}ngOnDestroy(){this.dead=true;this.observer?.disconnect();this.app?.destroy(true,{children:true});}
  async initialize(){if(this.initing||this.app||this.dead)return;this.initing=true;this.error.set('');const app=new Application();try{await app.init({preference:'webgl',backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false,width:this.surface.nativeElement.clientWidth,height:this.surface.nativeElement.clientHeight});if(this.dead){app.destroy(true,{children:true});return;}this.app=app;this.surface.nativeElement.append(app.canvas);app.stage.addChild(this.root);this.observer=new ResizeObserver(()=>{app.renderer.resize(this.surface.nativeElement.clientWidth,this.surface.nativeElement.clientHeight);this.fit();});this.observer.observe(this.surface.nativeElement);const host=this.surface.nativeElement;host.addEventListener('pointerdown',this.down);host.addEventListener('pointermove',this.move);host.addEventListener('pointerup',this.up);host.addEventListener('pointercancel',this.up);host.addEventListener('lostpointercapture',this.up);host.addEventListener('wheel',this.wheel,{passive:false});this.draw();}catch(e){this.error.set('Графика недоступна. Попробуйте включить WebGL или повторите загрузку. Списки навигации остаются доступны.');console.error(e);}finally{this.initing=false;}}
  private down=(e:PointerEvent)=>{if(!e.isPrimary||e.button!==0||this.pointerId!==null)return;const target=this.app?.canvas??this.surface.nativeElement;target.setPointerCapture(e.pointerId);this.captureTarget=target;this.pointerId=e.pointerId;this.dragging=true;this.moved=false;this.last={x:e.clientX,y:e.clientY};};
@@ -17,7 +20,16 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  keyboard(e:KeyboardEvent){const dirs:Record<string,[number,number]>={ArrowLeft:[45,0],ArrowRight:[-45,0],ArrowUp:[0,45],ArrowDown:[0,-45]};if(dirs[e.key]){e.preventDefault();this.root.x+=dirs[e.key][0];this.root.y+=dirs[e.key][1];this.render();}else if(e.key==='+'||e.key==='=')this.zoom(1.2);else if(e.key==='-')this.zoom(1/1.2);else if(e.key==='Home')this.fit();}
  zoom(factor:number){if(!this.app)return;const old=this.root.scale.x,next=Math.max(.15,Math.min(5,old*factor)),cx=this.app.screen.width/2,cy=this.app.screen.height/2;this.root.position.set(cx-(cx-this.root.x)*next/old,cy-(cy-this.root.y)*next/old);this.root.scale.set(next);this.render();}
  fit(){if(!this.app||!this.root.children.length)return;const b=this.root.getLocalBounds();const w=this.app.screen.width,h=this.app.screen.height;const s=Math.min((w-100)/b.width,(h-100)/b.height,1.65);this.root.scale.set(s);this.root.position.set(w/2-(b.x+b.width/2)*s,h/2-(b.y+b.height/2)*s);this.render();}
- private render(){this.app?.render();}
+ private countryMarkers:{id:string;x:number;y:number;label:Text}[]=[];
+ private render(){
+  this.app?.render();
+  const host=this.surface?.nativeElement;
+  if(host?.dataset){if(this.kind==='city')host.dataset['landmark']=landmarkKind(this.city);else delete host.dataset['landmark'];}
+  if(host?.dataset)host.dataset['countryMarkers']=this.kind==='country'?JSON.stringify(this.countryMarkers.map(m=>{
+   const b=m.label.visible?m.label.getBounds():undefined;
+   return {id:m.id,x:this.root.x+m.x*this.root.scale.x,y:this.root.y+m.y*this.root.scale.y,label:b?{x:b.x,y:b.y,width:b.width,height:b.height}:undefined};
+  })):'[]';
+ }
  private poly(g:Graphics,p:number[],color:number,alpha=1){g.poly(p).fill({color,alpha});}
  private iso(x:number,y:number,z=0){return{x:x-y,y:(x+y)*.48-z};}
  private tile(g:Graphics,x:number,y:number,w:number,d:number,color:number){const a=this.iso(x,y),b=this.iso(x+w,y),c=this.iso(x+w,y+d),e=this.iso(x,y+d);this.poly(g,[a.x,a.y,b.x,b.y,c.x,c.y,e.x,e.y],color);}
@@ -39,19 +51,44 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  private parking(g:Graphics,x:number,y:number,spaces:number){this.tile(g,x,y,65,65,0x929d9b);for(let i=0;i<10;i++){const px=x+5+(i%2)*31,py=y+5+Math.floor(i/2)*11;this.tile(g,px,py,25,1,0xd9ddd3);if(i<spaces){this.tile(g,px+3,py+2,17,7,[0x416889,0xd7d2bb,0x71897b,0xbc8569][i%4]);this.tile(g,px+8,py+3,6,5,0xaec4c7);}}}
  private landmark(g:Graphics,x:number,y:number){this.tile(g,x-25,y-25,140,140,0xd8d5c4);this.tile(g,x-10,y-10,110,110,0xeae4d4);this.building(g,x+16,y+16,2,2,false,1.25);const p=this.iso(x+46,y+45,66);g.circle(p.x,p.y,14).fill(0x647d86);g.circle(p.x,p.y-1,9).fill(0xece5d0);g.moveTo(p.x,p.y-7).lineTo(p.x,p.y).lineTo(p.x+5,p.y+3).stroke({color:0x415c72,width:2});for(const [a,b] of [[-15,85],[80,-15],[92,90]])this.tree(g,x+a,y+b);}
  private draw(){if(!this.app)return;this.ready.set(false);const key=this.kind+this.city?.id+this.street?.id;const changed=key!==this.key;this.key=key;this.root.removeChildren().forEach(c=>c.destroy({children:true}));if(this.kind==='country')this.country();else if(this.kind==='city'&&this.city)this.cityScene(this.city);else if(this.street)this.streetScene(this.street);if(changed)this.fit();else this.render();this.ready.set(true);}
- private country(){const g=new Graphics();this.root.addChild(g);
-  // Original, deliberately schematic coastline, not a geographic dataset or commercial map.
-  const shape=[45,245,71,202,62,174,89,147,109,121,100,99,125,85,139,51,164,63,184,95,218,101,249,81,265,91,285,76,330,86,353,65,375,78,409,48,430,61,443,49,474,69,499,61,523,89,548,68,579,84,596,65,617,76,645,60,659,91,695,83,718,103,747,79,774,109,802,90,817,120,843,115,870,142,899,130,919,147,956,145,971,174,945,194,960,217,941,237,927,210,904,198,898,245,879,251,863,293,850,302,838,274,822,245,805,229,779,242,759,271,739,272,719,291,692,297,670,319,643,328,622,313,604,333,571,318,550,335,523,318,505,337,477,324,457,337,431,322,400,333,375,315,350,333,325,310,297,316,279,299,254,316,235,296,209,304,192,288,172,291,160,278,137,286,119,270,98,283,83,259,65,263];
-  this.poly(g,shape.map((n,i)=>i%2?n+9:n+4),0xb1beb5,.25);this.poly(g,shape,0xdce2d4);g.poly(shape).stroke({color:0xc1cbbb,width:1.5});
-  for(let x=100;x<950;x+=100)g.moveTo(x,10).lineTo(x,365).stroke({color:0x6f8f8b,alpha:.10,width:1});
-  for(let y=50;y<370;y+=80)g.moveTo(20,y).lineTo(980,y).stroke({color:0x6f8f8b,alpha:.10,width:1});
-  const sea=new Text({text:'С Е В Е Р Н Ы Й   Л Е Д О В И Т Ы Й   О К Е А Н',style:{fontSize:10,fill:0x92a3a2,fontFamily:'sans-serif'}});sea.position.set(335,10);this.root.addChild(sea);
-  // Labels use a collision-free greedy placement; actual point positions remain API coordinates.
+ private country(){
+  this.countryMarkers=[];
+  const shadow=new Graphics(),land=new Graphics();
+  shadow.position.set(2,5);this.root.addChild(shadow,land);
+  for(const ring of COUNTRY_RINGS){
+   shadow.poly([...ring]).fill({color:0x78988d,alpha:.13});
+   land.poly([...ring]).fill(0xdce3d4).stroke({color:0xb4c6b4,width:1.1});
+  }
+  const sea=new Text({text:'С Е В Е Р Н Ы Й   Л Е Д О В И Т Ы Й   О К Е А Н',style:{fontSize:12,fill:0x92a3a2,fontFamily:'Manrope Variable, sans-serif'}});
+  sea.position.set(385,-30);this.root.addChild(sea);
   const labels:{x:number;y:number;w:number;h:number}[]=[];
-  for(const c of this.cities){const x=40+c.mapX*8.8,y=45+c.mapY*3.1;const mark=new Graphics().circle(x,y,14).fill({color:0x326c9b,alpha:.08}).circle(x,y,4).fill(0x236a9d);mark.eventMode='static';mark.cursor='pointer';mark.on('pointertap',()=>{if(!this.moved)this.citySelect.emit(c);});this.root.addChild(mark);const text=new Text({text:c.name,style:{fontSize:11,fontWeight:'500',fill:0x304b59,fontFamily:'Manrope Variable, sans-serif'}});const w=text.width+8,h=19;let pos={x:x+9,y:y-8,w,h};for(let k=0;k<35;k++){const candidate={x:x+9+(k%2===0?0:-w-15),y:y-8+Math.ceil(k/2)*19*(k%2===0?1:-1),w,h};if(!labels.some(r=>candidate.x<r.x+r.w&&candidate.x+w>r.x&&candidate.y<r.y+r.h&&candidate.y+h>r.y)){pos=candidate;break;}}labels.push(pos);if(Math.abs(pos.y-y)>20)g.moveTo(x,y).lineTo(pos.x,pos.y+6).stroke({color:0x91a79d,width:.7});text.position.set(pos.x,pos.y);text.eventMode='static';text.cursor='pointer';text.on('pointertap',()=>this.citySelect.emit(c));this.root.addChild(text);}
+  const markerLayer=new Container();
+  for(const c of this.cities){
+   const point=cityPoint(c.name);if(!point)continue;
+   const {x,y}=point,major=LABEL_CITIES.has(c.name);
+   const mark=new Graphics().circle(x,y,major?11:6).fill({color:0x326c9b,alpha:.09}).circle(x,y,major?4.5:2.6).fill(0x236a9d);
+   const distances=this.cities.filter(other=>other.id!==c.id).map(other=>cityPoint(other.name)).filter(p=>p!==undefined).map(p=>Math.hypot(p.x-x,p.y-y));
+   mark.hitArea=new Circle(x,y,Math.min(7,...distances.map(distance=>distance*.49)));mark.eventMode='static';mark.cursor='pointer';
+   const text=new Text({text:c.name,style:{fontSize:major?15:14,fontWeight:major?'600':'500',fill:0x304b59,fontFamily:'Manrope Variable, sans-serif'}});
+   const w=text.width+8,h=23;let pos={x:x+12,y:y-10,w,h};
+   for(const [dx,dy] of [[12,-10],[-w-12,-10],[12,-29],[-w-12,15],[12,15],[-w-12,-29]]){
+    const candidate={x:x+dx,y:y+dy,w,h};
+    if(!labels.some(r=>candidate.x<r.x+r.w&&candidate.x+w>r.x&&candidate.y<r.y+r.h&&candidate.y+h>r.y)){pos=candidate;break;}
+   }
+   if(major)labels.push(pos);
+   text.position.set(pos.x,pos.y);text.visible=major;text.eventMode='static';text.cursor='pointer';
+   const select=()=>{if(!this.moved)this.citySelect.emit(c);};
+   mark.on('pointertap',select);text.on('pointertap',select);
+   mark.on('pointerover',()=>{text.visible=true;this.render();});
+   mark.on('pointerout',()=>{text.visible=major;this.render();});
+   markerLayer.addChild(mark);this.root.addChild(text);this.countryMarkers.push({id:c.id,x,y,label:text});
+  }
+  // Keep exact geographic centers clickable even where a label crosses another marker.
+  this.root.addChild(markerLayer);
  }
- private cityScene(city:City){const ground=new Graphics();this.root.addChild(ground);this.tile(ground,-65,-65,1020,910,0xe0e2d4);this.tile(ground,-42,-42,974,864,0xf1eee3);this.tile(ground,-42,365,974,55,0xa8c4c3);this.tile(ground,410,-42,45,864,0xc4c7bb);this.landmark(ground,430,440);
+ private cityScene(city:City){const ground=new Graphics();this.root.addChild(ground);this.tile(ground,-65,-65,1020,910,0xe0e2d4);this.tile(ground,-42,-42,974,864,0xf1eee3);this.tile(ground,-42,365,974,55,0xa8c4c3);this.tile(ground,410,-42,45,864,0xc4c7bb);
   city.streets.forEach((s,i)=>{const {x,y}=cityBlockPosition(i);const cluster=new Container();const g=new Graphics();cluster.addChild(g);this.tile(g,x,y,100,105,0xe0dfd0);this.tile(g,x,y+85,109,16,0xa9b0aa);s.houses.slice(0,5).forEach((h,j)=>this.building(g,x+8+(j%3)*29,y+12+Math.floor(j/3)*32,h.tier,i+j,h.status==='pending_demolition',.49));s.parking.slice(0,1).forEach(p=>{this.tile(g,x+65,y+45,26,28,0x899b98);});this.tree(g,x+92,y+16);cluster.eventMode='static';cluster.cursor='pointer';const a=this.iso(x,y),b=this.iso(x+105,y+105);cluster.hitArea=new Rectangle(a.x-108,a.y-95,215,b.y-a.y+100);cluster.on('pointertap',()=>{if(!this.moved)this.streetSelect.emit(s);});this.root.addChild(cluster);if(s.name){const p=this.iso(x,y+103);const label=new Text({text:s.name,style:{fontSize:8,fill:0x36526a,fontFamily:'sans-serif'}});label.position.set(p.x,p.y+3);this.root.addChild(label);}});
+  const center=new Graphics();drawCityLandmark(center,430,440,landmarkKind(city));this.root.addChild(center);
  }
  private streetScene(street:Street){const g=new Graphics();this.root.addChild(g);const max=Math.max(11,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex)),rows=Math.floor(max/6)+1;
  this.tile(g,-70,-85,790,rows*126+180,0xdde1d2);this.tile(g,-50,-65,750,rows*126+140,0xece9dc);

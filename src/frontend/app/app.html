@@ -11,7 +11,7 @@
 }
 <div class="sidebar-footer"><span class="north-icon">↟</span><p>Не цифры. Не рейтинг.<br><strong>Видимый результат вашей работы.</strong></p></div></aside>
 <section class="atlas" aria-label="Визуальный атлас">
-<div class="scene-caption"><span>{{scene()==='country'?'РОССИЯ / СХЕМАТИЧЕСКАЯ КАРТА':scene()==='city'?'ГОРОД / ОБЩИЙ ОБЛИК':'УЛИЦА / ДЕТАЛЬНЫЙ ВИД'}}</span><span class="compass">С ↗</span></div>
+<div class="scene-caption"><span>{{scene()==='country'?'РОССИЯ / ГЕОГРАФИЧЕСКАЯ ОСНОВА':scene()==='city'?'ГОРОД / ОБЩИЙ ОБЛИК':'УЛИЦА / ДЕТАЛЬНЫЙ ВИД'}}</span><span class="compass">С ↗</span></div>
 @if(loading()){<div class="state-overlay" role="status"><span class="loading-mark"></span><h2>Собираем городской атлас</h2><p>Загружаем сохранённый мир с сервера.</p></div>}@else if(state()){<vsk-scene [kind]="scene()" [cities]="cities()" [city]="city()" [street]="street()" (citySelect)="openCity($event)" (streetSelect)="openStreet($event)"/>}@else{<div class="state-overlay"><h2>Атлас пока недоступен</h2><p>Для просмотра необходим работающий backend.</p><button class="primary" (click)="retry()">Повторить загрузку</button></div>}
 @if(error()){<div class="error-toast" role="alert"><strong>Не удалось получить подтверждение</strong><p>{{error()}}</p>@if(pending()){<p>Результат действия неизвестен. Повтор отправит тот же ключ, без двойного начисления.</p>}<button (click)="retry()" [disabled]="busy()">Повторить запрос</button></div>}
 <div class="atlas-bottom"><span class="map-key"><i class="key-house"></i> Жилая застройка <i class="key-tree"></i> Городская среда <i class="key-pending"></i> Под снос</span><span>ПЕРЕТАЩИТЕ КАРТУ · КОЛЕСО ДЛЯ МАСШТАБА</span></div>

@@ -112,11 +112,18 @@ test('real browser: country, city, street and pitch controls', async ({ page }, 
   await expect(page.getByTestId('scene-surface')).toHaveAttribute('data-ready', 'true');
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: info.outputPath('01-country.png'), fullPage: true });
-  // Fixed viewport + deterministic fixture: exercise native Pixi pointertap, not only DOM navigation.
-  await page.mouse.click(580, 507);
+  // Use actual rendered marker positions; still click native Pixi, not DOM navigation.
+  const clickCityMarker=async(id)=>{
+    const surface=page.getByTestId('scene-surface');
+    await expect.poll(()=>surface.evaluate((el,id)=>JSON.parse(el.dataset.countryMarkers||'[]').some(m=>m.id===id),id)).toBe(true);
+    const marker=await surface.evaluate((el,id)=>JSON.parse(el.dataset.countryMarkers).find(m=>m.id===id),id);
+    const box=await surface.boundingBox();
+    await page.mouse.click(box.x+marker.x,box.y+marker.y);
+  };
+  await clickCityMarker('TEST-CITY-001');
   await expect(page.getByTestId('scene-title')).toContainText('Москва');
   await page.getByTestId('country-nav').click();
-  await page.mouse.click(1268, 593);
+  await clickCityMarker('TEST-CITY-025');
   await expect(page.getByTestId('scene-title')).toContainText('Владивосток');
   await page.getByTestId('country-nav').click();
   await page.getByTestId('city-TEST-CITY-001').first().click();
