@@ -1,0 +1,60 @@
+{
+  "capturedAt": "2026-11-06T06:45:50.122608+00:00",
+  "activeSprites": 23,
+  "userHouseSources": {
+    "new/house_01.svg": "6d00ccf55a8dac48d3f5b8fd1e37b3bface5833aea0893dcc163131644cca77d",
+    "new/house_02.svg": "1c96104ffc66278faba853a4e5fbfe34016c31bef1a354c8e3fceea82b238896",
+    "new/house_03.svg": "994794c3c96c1a3dcf988abc198db1f2e0daa3180fac52dc0ad0e80f22a06fd0",
+    "new/house_04.svg": "9a9a346c9dad15e23f4c2944813540173124103868e86e536936147e38c7bf9b",
+    "new/house_05.svg": "0a7cce0b2592045c1a8af901fbf592400949ba4fde55b2e3a3198abde5bb7923",
+    "new/house_06.svg": "ce9736f552acb8bd8150107bd2e9db7e75d1f4759475fc668bf8effe456ad56d",
+    "new/house_07.svg": "8e83dc067c69f867001ce65878e0dbcf1bd043792028e32cae9959221c847a4d",
+    "new/house_08.svg": "eb2d38016a641f3d53ca97d99b19dfd4ffe97416727d9c8038d5b5bebf3dfee8"
+  },
+  "pngSha256": {
+    "house-01": "2a4b7748b4dbb85be620342a16baf696c921257ac406ed894c675c3c223943e3",
+    "house-02": "dcecd2d0d3246b26cfbfbf68588856f121b218f1b55c8f3cb2084bdd2fb3b948",
+    "house-03": "4eea3eca6b9cbb8405d1acb833e336abfbda10f8c9c498e6c61d11c1de3067b8",
+    "house-04": "786b1c940980a61ee81c376faff36bd39b01adf6ba92f856f304c506cb1d88e3",
+    "house-05": "3bf0d5568fd189bc38c820d00a2c1e38c3b1b82ff8c21fadb05913527a469061",
+    "house-06": "4ca9c7800d6922330772cf8ed715784cc1cea23f69dd4076ccfc176c4b595cd2",
+    "house-07": "978805aa96cd875cc3fb600bc72ad531b098d20b40c62ed3774ce21e1a417f98",
+    "house-08": "ed927260475b1fed62a46be9cdd3c60446570caaec31c67bbfb89cd7b035fd07",
+    "parking-01": "598ab492278fdf7865fe51b8892d80b467a4a2d33c98ccfd333ffbf375ee4c6a",
+    "parking-02": "821147b02b9adad09eeb4af8d87795a82cf833f8fe682dd17f0f68bc00ae3475",
+    "parking-03": "896be649f17746a99cfd330c146fd8bd1b6315e637d847cdea0b02976c1e386d",
+    "parking-04": "9f9f2c6010f0e4d1a1016de8a355d3e2c147a68f2260d5d03fa4d6bcf4c5278f",
+    "center-moscow": "f455c2c00da2df99b0e688a051c80ca8456ac55a7a58c350e96018d723f312f3",
+    "center-vladivostok": "c910fb156b6137972dd1e286257388d3b6e4f05ea3f4f13a2c8b7eb644dc48fa",
+    "center-generic": "9af3d864ae200a596ecc5e3acc66d34764ee7c8357404f349e061a3cc2a5e777",
+    "tree-broadleaf": "9e2a47c4693b3917bfceae9a9ec1d3744eb7395ed09a3d5c60d79ed59b51c4d9",
+    "tree-conifer": "ce00e5f2b776cf95dec22f5d511f427b9b70b88d2cce9bddd0f22a4347a1c126",
+    "shrub": "12770de166f51ddbb4a4985d164245e257886e5cb7f8a4abef356bc503f7fd9c",
+    "grass": "ff66f9de2a7474ddf2e87385bea0901256d194bf87e56cd0f5e29e38744a5dbb",
+    "vacant-lot": "0e69d8c9170ebb6be4a8ccdd036c4a60ec56bfbfa1c63ccedb85dcf80cafe47d",
+    "road-straight": "c29bf564729145315e139c737f811414402b4982a7b9f29159bb15074153c4dd",
+    "road-crossing": "7e502f73df296aa19cd07ce73fbff4d25e5249ad0f05770c85a05af3bee8743f",
+    "sidewalk": "ac0107d86db3055d5ef4195561809d7cdcf04869d8edaf04fdb38b28b3521128"
+  },
+  "baselineWorldVersion": 197,
+  "observedWorldVersion": 197,
+  "backendPostgresRedisContainerIdsUnchanged": true,
+  "worldResetPerformed": false,
+  "readonlyPlaywright": {
+    "status": "passed",
+    "failedTests": []
+  },
+  "frontendImage": "sha256:077b89486881089eec920e15579f41277eccfe9e818512550b192b4f7cad656b",
+  "sourceSha256": {
+    "src/frontend/app/scene.ts": "937abb9acd516d9a231bd369e5f1464dc9b8f726660c224a229895f614e40c1b",
+    "src/frontend/app/sprite-pack.ts": "c403144a931d85f212c6c63ce7a6008c2e4165b5b4297fcf2479955f793de458",
+    "scripts/export-sprites.mjs": "a494c6a71180269debef301007bc1b24d9c1518ab49f13b38fa3df4aec651756",
+    "scripts/sprite-spec.json": "826a64bf6f020a5600542bb17e263c9cb2f7fd383a33c5d556875a2deac7e89c"
+  },
+  "screenshots": [
+    "11-sprite-catalog.png",
+    "12-user-house-street.png",
+    "13-user-house-city.png",
+    "14-user-house-large-street.png"
+  ]
+}
