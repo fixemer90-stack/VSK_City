@@ -1,0 +1,126 @@
+{
+  "pack": "Insurance City / Package 2",
+  "format": "SVG vector-traced illustration",
+  "assets": [
+    {
+      "id": "IC_L09_A",
+      "levelFloors": 9,
+      "variant": "A",
+      "type": "Панельный дом позднесоветского типа",
+      "asset": "IC_L09_A.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L09_B",
+      "levelFloors": 9,
+      "variant": "B",
+      "type": "Кирпичный девятиэтажный дом",
+      "asset": "IC_L09_B.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L12_A",
+      "levelFloors": 12,
+      "variant": "A",
+      "type": "Панельный жилой дом",
+      "asset": "IC_L12_A.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L12_B",
+      "levelFloors": 12,
+      "variant": "B",
+      "type": "Монолитно-кирпичный дом",
+      "asset": "IC_L12_B.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L14_A",
+      "levelFloors": 14,
+      "variant": "A",
+      "type": "Улучшенная панельная серия",
+      "asset": "IC_L14_A.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L14_B",
+      "levelFloors": 14,
+      "variant": "B",
+      "type": "Современный монолитный дом",
+      "asset": "IC_L14_B.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L17_A",
+      "levelFloors": 17,
+      "variant": "A",
+      "type": "Крупнопанельный дом",
+      "asset": "IC_L17_A.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L17_B",
+      "levelFloors": 17,
+      "variant": "B",
+      "type": "Монолитно-кирпичный дом",
+      "asset": "IC_L17_B.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L25_A",
+      "levelFloors": 25,
+      "variant": "A",
+      "type": "Современная жилая высотка",
+      "asset": "IC_L25_A.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    },
+    {
+      "id": "IC_L25_B",
+      "levelFloors": 25,
+      "variant": "B",
+      "type": "Высотный жилой комплекс",
+      "asset": "IC_L25_B.svg",
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      },
+      "productionReady": false
+    }
+  ]
+}

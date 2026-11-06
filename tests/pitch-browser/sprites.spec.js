@@ -1,26 +1,28 @@
 import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 
-test('all 23 transparent sprites are real decoded PNGs and the local catalog renders every asset',async({page,request},info)=>{
+test('all 35 transparent sprites include twenty original paired houses and the catalog renders every asset',async({page,request},info)=>{
  const response=await request.get('/sprites/manifest.json');
  expect(response.headers()['content-type']).toContain('application/json');
- const manifest=await response.json();expect(manifest.entries).toHaveLength(23);
- expect(new Set(manifest.entries.map(e=>e.id)).size).toBe(23);
+ const manifest=await response.json();expect(manifest.entries).toHaveLength(35);
+ expect(new Set(manifest.entries.map(e=>e.id)).size).toBe(35);
+ const floors=[1,3,4,5,6,9,12,14,17,25];
  for(const entry of manifest.entries){
   const image=await request.get('/sprites/'+entry.file);
   expect(image.ok()).toBe(true);expect(image.headers()['content-type']).toContain('image/png');
   expect((await image.body()).subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
   expect(createHash('sha256').update(await image.body()).digest('hex')).toBe(entry.sha256);
   if(entry.id.startsWith('house-')){
-   expect(entry.sourceFile).toBe(`new/house_${entry.id.slice(-2)}.svg`);
+   const match=/^house-(\d{2})-([ab])$/.exec(entry.id);expect(match).toBeTruthy();
+   expect(entry.sourceFile).toBe(`house/IC_L${String(floors[Number(match[1])-1]).padStart(2,'0')}_${match[2].toUpperCase()}.svg`);
    const original=await request.get('/sprites/source/'+entry.sourceFile);
    expect(original.ok()).toBe(true);
    expect(createHash('sha256').update(await original.body()).digest('hex')).toBe(entry.sourceSha256);
   }
  }
  await page.goto('/sprites/catalog.html');
- await expect(page.locator('figure[data-sprite]')).toHaveCount(23);
- await expect.poll(()=>page.locator('figure img').evaluateAll(images=>images.filter(img=>img.complete&&img.naturalWidth>0).length)).toBe(23);
+ await expect(page.locator('figure[data-sprite]')).toHaveCount(35);
+ await expect.poll(()=>page.locator('figure img').evaluateAll(images=>images.filter(img=>img.complete&&img.naturalWidth>0).length)).toBe(35);
  const alpha=await page.locator('figure img').evaluateAll(images=>images.map(image=>{
   const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
   const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
@@ -40,7 +42,7 @@ test('street and city use actual sprite instances through read-only UI navigatio
  expect(large).toBeTruthy();expect(parking).toBeTruthy();
  await page.goto('/');
  const surface=page.getByTestId('scene-surface');
- await expect(surface).toHaveAttribute('data-ready','true');await expect(surface).toHaveAttribute('data-sprite-assets','23');
+ await expect(surface).toHaveAttribute('data-ready','true');await expect(surface).toHaveAttribute('data-sprite-assets','35');
  await page.screenshot({path:info.outputPath('sprite-street.png'),fullPage:true});
  await page.getByTestId('demo-scenario').selectOption(large.agentId);
  await expect(page.getByTestId('action-property')).toBeEnabled();await page.getByTestId('my-street').click();

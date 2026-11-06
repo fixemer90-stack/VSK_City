@@ -6,6 +6,22 @@ import {DemoApi} from '../app/model.ts';
 
 const world={mode:'pitch',version:2,now:'2026-11-05T00:00:00Z',viewer:{agentId:'TEST-AGENT-001-044',streetId:'street',cityId:'city',firstName:'Имя',lastName:'Фамилия',role:'agent'},cities:[]};
 
+test('a new rules version invalidates cached city projections without changing saved world version',async()=>{
+ const app=new AppComponent();
+ const house={id:'house',lotIndex:0,xp:100,tier:8,floors:100,status:'active',demolishAt:null};
+ const street={id:'street',agentId:world.viewer.agentId,name:null,scenario:'skyscraper',houses:[house],parking:[]};
+ const city={id:'city',name:'Москва',mapX:0,mapY:0,streets:[street]};
+ app.state.set({...world,rulesVersion:1,cities:[city]} as any);
+ const updated={...world,rulesVersion:2,cities:[{...city,streets:[{...street,houses:[{...house,tier:10,floors:25}]}]}]};
+ (app as any).api=new DemoApi((async()=>new Response(JSON.stringify(updated))) as typeof fetch);
+ try{
+  await app.load(false);
+  assert.equal(app.state()?.version,2);
+  assert.equal(app.state()?.cities[0].streets[0].houses[0].tier,10);
+  assert.equal(app.state()?.cities[0].streets[0].houses[0].floors,25);
+ }finally{app.ngOnDestroy();}
+});
+
 test('a stale GET cannot overwrite a newer POST even if transport ignores abort',async()=>{
  const app=new AppComponent();let resolveGet!:(response:Response)=>void;
  (app as any).api=new DemoApi((async(_url:RequestInfo|URL,init?:RequestInit)=>init?.method==='POST'?new Response(JSON.stringify(world)):new Promise<Response>(resolve=>{resolveGet=resolve;})) as typeof fetch);

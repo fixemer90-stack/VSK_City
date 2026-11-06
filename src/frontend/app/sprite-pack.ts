@@ -1,6 +1,7 @@
 import {Assets,Container,Matrix,Sprite,Texture} from 'pixi.js';
 export const SPRITE_IDS=[
- 'house-01','house-02','house-03','house-04','house-05','house-06','house-07','house-08',
+ 'house-01-a','house-01-b','house-02-a','house-02-b','house-03-a','house-03-b','house-04-a','house-04-b','house-05-a','house-05-b',
+ 'house-06-a','house-06-b','house-07-a','house-07-b','house-08-a','house-08-b','house-09-a','house-09-b','house-10-a','house-10-b',
  'parking-01','parking-02','parking-03','parking-04',
  'center-moscow','center-vladivostok','center-generic',
  'tree-broadleaf','tree-conifer','shrub','grass','vacant-lot','road-straight','road-crossing','sidewalk',
@@ -39,9 +40,12 @@ export function parseSpriteManifest(value:unknown):SpriteManifest {
  return {version:1,entries};
 }
 
-export function houseSpriteId(tier:number):SpriteId {
- if(!Number.isInteger(tier)||tier<1||tier>8)throw new Error('Invalid house tier');
- return `house-${String(tier).padStart(2,'0')}` as SpriteId;
+export function houseSpriteId(tier:number,identity:string):SpriteId {
+ if(!Number.isInteger(tier)||tier<1||tier>10)throw new Error('Invalid house tier');
+ if(typeof identity!=='string'||!identity)throw new Error('Invalid house identity');
+ let hash=2166136261;
+ for(let i=0;i<identity.length;i++)hash=Math.imul(hash^identity.charCodeAt(i),16777619)>>>0;
+ return `house-${String(tier).padStart(2,'0')}-${hash%2===0?'a':'b'}` as SpriteId;
 }
 export function parkingSpriteId(spaces:number):SpriteId|undefined {
  if(!Number.isInteger(spaces)||spaces<0||spaces>10)throw new Error('Invalid parking occupancy');

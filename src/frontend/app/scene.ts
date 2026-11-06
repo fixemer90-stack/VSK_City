@@ -12,7 +12,7 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  @Output() citySelect=new EventEmitter<City>();@Output() streetSelect=new EventEmitter<Street>();
  ready=signal(false);error=signal('');private app?:Application;private root=new Container();private observer?:ResizeObserver;private dead=false;private dragging=false;private pointerId:number|null=null;private captureTarget?:Element;private moved=false;private last={x:0,y:0};private key='';private initing=false;
  get centerName(){return landmarkName(this.city);}
- private pack?:SpritePack;
+ private pack?:SpritePack;private houseSprites:Record<string,string>={};
  get description(){return this.kind==='country'?'Карта России на географической основе. Выбор городов доступен в списке.':this.kind==='city'?`${this.city?.name??'Город'}. Постоянный центр: ${this.centerName}. Улицы доступны на карте и в списке.`:'Изометрическая застройка. Стрелки — перемещение, плюс и минус — масштаб. Доступный список объектов находится рядом.';}
  ngAfterViewInit(){void this.initialize();}ngOnChanges(){this.draw();}ngOnDestroy(){this.dead=true;this.observer?.disconnect();this.app?.destroy(true,{children:true});}
  async initialize(){if(this.initing||this.app||this.dead)return;this.initing=true;this.error.set('');const app=new Application();try{this.pack=await loadSpritePack();if(this.dead)return;await app.init({preference:'webgl',backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false,width:this.surface.nativeElement.clientWidth,height:this.surface.nativeElement.clientHeight});if(this.dead){app.destroy(true,{children:true});return;}this.app=app;this.surface.nativeElement.append(app.canvas);app.stage.addChild(this.root);this.observer=new ResizeObserver(()=>{app.renderer.resize(this.surface.nativeElement.clientWidth,this.surface.nativeElement.clientHeight);this.fit();});this.observer.observe(this.surface.nativeElement);const host=this.surface.nativeElement;host.addEventListener('pointerdown',this.down);host.addEventListener('pointermove',this.move);host.addEventListener('pointerup',this.up);host.addEventListener('pointercancel',this.up);host.addEventListener('lostpointercapture',this.up);host.addEventListener('wheel',this.wheel,{passive:false});this.draw();}catch(e){this.error.set('Графика недоступна. Попробуйте включить WebGL или повторите загрузку. Списки навигации остаются доступны.');console.error(e);}finally{this.initing=false;}}
@@ -31,7 +31,7 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
    host.dataset['spriteAssets']=String(this.pack?.manifest.entries.length??0);
    const counts:Record<string,number>={};
    const visit=(container:Container)=>{for(const child of container.children){if(child instanceof Sprite)counts[child.label]=(counts[child.label]??0)+1;else if(child instanceof Container)visit(child);}};
-   visit(this.root);host.dataset['spriteInstances']=JSON.stringify(counts);
+   visit(this.root);host.dataset['spriteInstances']=JSON.stringify(counts);host.dataset['houseSprites']=JSON.stringify(this.houseSprites);
   }
   if(host?.dataset)host.dataset['countryMarkers']=this.kind==='country'?JSON.stringify(this.countryMarkers.map(m=>{
    const b=m.label.visible?m.label.getBounds():undefined;
@@ -43,13 +43,13 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  private tile(g:Graphics,x:number,y:number,w:number,d:number,color:number){const a=this.iso(x,y),b=this.iso(x+w,y),c=this.iso(x+w,y+d),e=this.iso(x,y+d);this.poly(g,[a.x,a.y,b.x,b.y,c.x,c.y,e.x,e.y],color);}
  private tree(g:Graphics,x:number,y:number){const p=this.iso(x,y);this.pack!.place(g.parent??this.root,Math.round(x+y)%3===0?'tree-conifer':'tree-broadleaf',p.x,p.y);}
  private shrub(g:Graphics,x:number,y:number){const p=this.iso(x,y);this.pack!.place(g.parent??this.root,'shrub',p.x,p.y);}
- private building(g:Graphics,x:number,y:number,tier:number,_seed:number,pending=false,scale=1){
-  const p=this.iso(x+22*scale,y+22*scale);const sprite=this.pack!.place(g.parent??this.root,houseSpriteId(tier),p.x,p.y,scale);
+ private building(g:Graphics,x:number,y:number,tier:number,identity:string,pending=false,scale=1){
+  const p=this.iso(x+22*scale,y+22*scale);const sprite=this.pack!.place(g.parent??this.root,houseSpriteId(tier,identity),p.x,p.y,scale);this.houseSprites[identity]=sprite.label;
   if(pending){sprite.tint=0xc7b394;const badge=this.iso(x,y+37*scale+8),flag=new Graphics();flag.roundRect(badge.x-23,badge.y-8,72,18,4).fill(0xe5bf71);const label=new Text({text:'Под снос',style:{fontFamily:'Manrope Variable, sans-serif',fontSize:10,fontWeight:'600',fill:0x59451f}});label.position.set(badge.x-18,badge.y-6);(g.parent??this.root).addChild(flag,label);}
  }
  private parking(g:Graphics,x:number,y:number,spaces:number){const id=parkingSpriteId(spaces);if(id){const p=this.iso(x+32.5,y+32.5);this.pack!.place(g.parent??this.root,id,p.x,p.y);}}
  private landmark(g:Graphics,x:number,y:number){const p=this.iso(x+45,y+45);this.pack!.place(g.parent??this.root,'center-generic',p.x,p.y,.6);}
- private draw(){if(!this.app)return;this.ready.set(false);const key=this.kind+this.city?.id+this.street?.id;const changed=key!==this.key;this.key=key;this.root.removeChildren().forEach(c=>c.destroy({children:true}));if(this.kind==='country')this.country();else if(this.kind==='city'&&this.city)this.cityScene(this.city);else if(this.street)this.streetScene(this.street);if(changed)this.fit();else this.render();this.ready.set(true);}
+ private draw(){if(!this.app)return;this.ready.set(false);const key=this.kind+this.city?.id+this.street?.id;const changed=key!==this.key;this.key=key;this.houseSprites={};this.root.removeChildren().forEach(c=>c.destroy({children:true}));if(this.kind==='country')this.country();else if(this.kind==='city'&&this.city)this.cityScene(this.city);else if(this.street)this.streetScene(this.street);if(changed)this.fit();else this.render();this.ready.set(true);}
  private country(){
   this.countryMarkers=[];
   const shadow=new Graphics(),land=new Graphics();
@@ -89,7 +89,7 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   city.streets.forEach((s,i)=>{
    const {x,y}=cityBlockPosition(i),cluster=new Container(),g=new Graphics();cluster.addChild(g);
    this.pack!.ground(cluster,'grass',x,y,100,105);this.pack!.ground(cluster,'road-straight',x,y+85,109,16);
-   s.houses.slice(0,5).forEach((h,j)=>this.building(g,x+8+(j%3)*29,y+12+Math.floor(j/3)*32,h.tier,i+j,h.status==='pending_demolition',.49));
+   s.houses.slice(0,5).forEach((h,j)=>this.building(g,x+8+(j%3)*29,y+12+Math.floor(j/3)*32,h.tier,h.id,h.status==='pending_demolition',.49));
    s.parking.slice(0,1).forEach(p=>{const id=parkingSpriteId(p.spaces);if(id){const spot=this.iso(x+78,y+59);this.pack!.place(cluster,id,spot.x,spot.y,.4);}});
    this.tree(g,x+92,y+16);cluster.eventMode='static';cluster.cursor='pointer';
    const a=this.iso(x,y),b=this.iso(x+105,y+105);cluster.hitArea=new Rectangle(a.x-108,a.y-95,215,b.y-a.y+100);
@@ -113,6 +113,6 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   if(!occupied.has(i))this.tree(g,p.x+55,p.y+24);
   this.tree(g,p.x+81,p.y+73);this.shrub(g,p.x+66,p.y+70);
  }
- this.landmark(g,690,30);const items=[...street.houses.map(h=>({lot:h.lotIndex,house:h})),...street.parking.map(p=>({lot:p.lotIndex,park:p}))].sort((a,b)=>{const x=lotPosition(a.lot),y=lotPosition(b.lot);return x.x+x.y-y.x-y.y;});for(const item of items){const p=lotPosition(item.lot);if('house'in item)this.building(g,p.x+12,p.y+10,item.house!.tier,item.lot,item.house!.status==='pending_demolition');else this.parking(g,p.x+5,p.y+3,item.park!.spaces);}
+ this.landmark(g,690,30);const items=[...street.houses.map(h=>({lot:h.lotIndex,house:h})),...street.parking.map(p=>({lot:p.lotIndex,park:p}))].sort((a,b)=>{const x=lotPosition(a.lot),y=lotPosition(b.lot);return x.x+x.y-y.x-y.y;});for(const item of items){const p=lotPosition(item.lot);if('house'in item)this.building(g,p.x+12,p.y+10,item.house!.tier,item.house!.id,item.house!.status==='pending_demolition');else this.parking(g,p.x+5,p.y+3,item.park!.spaces);}
  }
 }

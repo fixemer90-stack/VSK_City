@@ -53,3 +53,20 @@ test('SceneComponent pointercancel and lostpointercapture stop the active drag',
   internal.move(event({clientX:80}));assert.equal(internal.root.x,0);assert.deepEqual(releases,[7]);
  }
 });
+
+test('actual house sprites keep identity across full and thumbnail scale and expose rendered identity mapping',async()=>{
+ const {SpritePack,SPRITE_IDS,houseSpriteId}=await import('../app/sprite-pack');
+ const {Texture,Graphics,Sprite}=await import('pixi.js');
+ const entries=SPRITE_IDS.map(id=>({id,file:`${id}.png?v=${'0'.repeat(12)}`,width:1,height:1,anchorX:.5,anchorY:.8,worldScale:.22,pixelRatio:2,sha256:'0'.repeat(64)}));
+ const {scene,internal}=fixture();const host=scene.surface.nativeElement as any;host.dataset={};
+ internal.pack=new SpritePack({version:1,entries},new Map(SPRITE_IDS.map(id=>[id,Texture.WHITE])));
+ const g=new Graphics();internal.root.addChild(g);
+ internal.building(g,10,20,10,'persisted-house',false,.49);
+ internal.building(g,30,40,10,'persisted-house',false,1);
+ const sprites=internal.root.children.filter((item:unknown)=>item instanceof Sprite);
+ assert.equal(sprites.length,2);assert.equal(sprites[0].label,houseSpriteId(10,'persisted-house'));
+ assert.equal(sprites[0].label,sprites[1].label);
+ internal.render();assert.equal(typeof host.dataset.houseSprites,'string');
+ assert.deepEqual(JSON.parse(host.dataset.houseSprites),{'persisted-house':sprites[0].label});
+ internal.root.destroy({children:true});
+});

@@ -6,8 +6,8 @@ public sealed class House
     public string Id { get; set; } = "";
     public int LotIndex { get; set; }
     public int Xp { get; set; }
-    public int Tier => new[] { 0, 3, 8, 15, 25, 40, 65, 100 }.Count(x => Xp >= x);
-    public int Floors => new[] { 2, 5, 9, 16, 25, 40, 60, 100 }[Tier - 1];
+    public int Tier => new[] { 0, 11, 22, 33, 44, 56, 67, 78, 89, 100 }.Count(x => Xp >= x);
+    public int Floors => new[] { 1, 3, 4, 5, 6, 9, 12, 14, 17, 25 }[Tier - 1];
     public string Status { get; set; } = "active";
     public DateTimeOffset? DemolishAt { get; set; }
 }

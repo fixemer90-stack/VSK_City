@@ -99,6 +99,8 @@ public sealed class DemoWorld(Engine engine, string seedPath)
         return new
         {
             mode = "pitch",
+            // Rule changes invalidate client projections independently of persisted operations.
+            rulesVersion = 2,
             version = world.Version,
             now = utcNow.AddSeconds(world.OffsetSeconds),
             viewer = new { agentId = agent.Id, streetId = $"STREET-{agent.Id}", cityId = agent.CityId, firstName = agent.FirstName, lastName = agent.LastName, role },

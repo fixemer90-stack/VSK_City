@@ -30,7 +30,7 @@ Frontend: `http://127.0.0.1:5188`; backend: `http://127.0.0.1:5189`.
 ## Проверки (реальные, не имитация)
 
 ```sh
-# Компиляция с warnings-as-errors и 17 C# проверок ядра/seed/privacy/idempotency:
+# Компиляция с warnings-as-errors и 18 C# проверок ядра/seed/privacy/idempotency:
 docker build -f src/backend/Dockerfile --target test -t vsk-pitch-backend-tests:local .
 # Альтернатива без сборки тестового образа:
 docker run --rm -v "$PWD:/repo" -v vsk-pitch-nuget:/root/.nuget/packages -w /repo \
@@ -49,7 +49,7 @@ xUnit/`dotnet test`; не требует дополнительного тест
 только строки `pitch_world` в `vsk_pitch` для проверки worker без GET и затем reset.
 Другие проекты, базы, CSV и volumes не затрагиваются.
 
-Проверено в Docker: 17 C# assertions, 7 HTTP tests, 3 persistence tests прошли.
+Историческая приёмка исходного E01 в Docker: 17 C# assertions, 7 HTTP tests, 3 persistence tests прошли.
 В TDD наблюдались красные проверки до реализации имущества, мотора, парковок,
 расторжений, сноса, seed, privacy, идемпотентности и HTTP persistence.
 
@@ -98,6 +98,26 @@ Redis хранит только `pitch:world:version` (TTL 600 секунд, м�
 восстанавливаемый из PostgreSQL при запросе/worker. Отказ Redis даёт unhealthy health,
 но не теряет/отменяет успешно сохранённую продажу. Приложение не возвращает ложную
 ошибку после PostgreSQL commit только из-за недоступного version-cache.
+
+### Обновление на 10 ступеней без миграции мира
+
+Пороги XP: `0/11/22/33/44/56/67/78/89/100`, этажность: `1/3/4/5/6/9/12/14/17/25`.
+Формула — округление `i × 100 / 9` до ближайшего целого для `i = 0…9`.
+Меняются только getter-only `House.Tier`/`Floors`: десериализация из PostgreSQL не
+использует прежние сериализованные значения этих полей, проекция считает их из XP.
+Не нужны UPDATE миграции, reset/seed, перераспределение XP, смена ID/lotIndex,
+deadline/receipts/demo-смещения/world version. При очередном обычном сохранении
+производные поля сериализуются уже по новой шкале. Лимит 100 XP и механики не меняются.
+Redis не хранит проекцию, поэтому устаревшего payload с tier/floors нет и смена ключа
+кеша не нужна; каждый ответ заново строится из PostgreSQL и отдаётся с `no-store`.
+
+Безопасная проверка этого изменения (не подключается к работающему стеку):
+`docker build -f src/backend/Dockerfile --target test -t vsk-pitch-backend-tests:ten-tiers .`.
+Наблюдался RED: `XP 0: expected tier 1, floors 1, got 1/2`; после замены шкалы — GREEN,
+18 console tests. Все целые XP 0…100 и моторные расторжения через девять границ проверены;
+legacy JSON test сохраняет все непроизводные поля и прежний receipt, проверяет максимум
+10/25 и сохранение моторного вклада. HTTP/persistence suites не повторялись, работающий
+мир не сбрасывался; это проверка исходников, не подтверждение развёртывания новой шкалы.
 
 ## Env приложения
 
