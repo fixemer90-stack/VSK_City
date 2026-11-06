@@ -1,19 +1,21 @@
 import {AfterViewInit,Component,ElementRef,EventEmitter,Input,OnChanges,OnDestroy,Output,ViewChild,signal} from '@angular/core';
-import {Application,Container,Graphics,Text,Rectangle,Circle} from 'pixi.js';
+import {Application,Container,Graphics,Text,Rectangle,Circle,Sprite} from 'pixi.js';
 import {City,Street,House,lotPosition,cityBlockPosition} from './model';
 import {COUNTRY_RINGS,cityPoint,LABEL_CITIES} from './country-geometry';
-import {drawCityLandmark,landmarkKind,landmarkName} from './city-landmarks';
+import {landmarkKind,landmarkName} from './city-landmarks';
+import {SpritePack,SpriteId,houseSpriteId,parkingSpriteId,loadSpritePack} from './sprite-pack';
 export type SceneKind='country'|'city'|'street';
-@Component({selector:'vsk-scene',standalone:true,styles:[`.landmark-caption{position:absolute;top:64px;left:26px;z-index:2;pointer-events:none;padding:9px 14px;border:1px solid #dce1d7;border-radius:8px;background:rgba(248,247,240,.94);color:#456274;font-size:13px;font-weight:600;box-shadow:0 4px 15px #28463808}`],template:`<div #surface class="pixi-surface" data-testid="scene-surface" [attr.data-ready]="ready()" role="img" [attr.aria-label]="description" tabindex="0" (keydown)="keyboard($event)"></div><div class="scene-tools" aria-label="Управление видом"><button (click)="zoom(1.2)" aria-label="Приблизить">＋</button><button (click)="zoom(1/1.2)" aria-label="Отдалить">−</button><button (click)="fit()" aria-label="Показать всю сцену">↗</button></div>@if(kind==='city'){<div class="landmark-caption" data-testid="landmark-caption">{{centerName}}</div>}@if(error()){<div class="render-error" role="alert">{{error()}} <button (click)="initialize()">Повторить</button></div>}`})
+@Component({selector:'vsk-scene',standalone:true,styles:[`.graphics-loading{position:absolute;inset:0;display:grid;place-items:center;background:#f5f4ebcc;color:#698172;font-size:14px;pointer-events:none}.landmark-caption{position:absolute;top:64px;left:26px;z-index:2;pointer-events:none;padding:9px 14px;border:1px solid #dce1d7;border-radius:8px;background:rgba(248,247,240,.94);color:#456274;font-size:13px;font-weight:600;box-shadow:0 4px 15px #28463808}`],template:`<div #surface class="pixi-surface" data-testid="scene-surface" [attr.data-ready]="ready()" role="img" [attr.aria-label]="description" tabindex="0" (keydown)="keyboard($event)"></div><div class="scene-tools" aria-label="Управление видом"><button (click)="zoom(1.2)" aria-label="Приблизить">＋</button><button (click)="zoom(1/1.2)" aria-label="Отдалить">−</button><button (click)="fit()" aria-label="Показать всю сцену">↗</button></div>@if(kind==='city'){<div class="landmark-caption" data-testid="landmark-caption">{{centerName}}</div>}@if(!ready()&&!error()){<div class="graphics-loading" role="status">Загружаем рисунки города…</div>}@if(error()){<div class="render-error" role="alert">{{error()}} <button (click)="initialize()">Повторить</button></div>}`})
 export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  @ViewChild('surface',{static:true}) surface!:ElementRef<HTMLDivElement>;
  @Input() kind:SceneKind='street';@Input() cities:City[]=[];@Input() city?:City;@Input() street?:Street;
  @Output() citySelect=new EventEmitter<City>();@Output() streetSelect=new EventEmitter<Street>();
  ready=signal(false);error=signal('');private app?:Application;private root=new Container();private observer?:ResizeObserver;private dead=false;private dragging=false;private pointerId:number|null=null;private captureTarget?:Element;private moved=false;private last={x:0,y:0};private key='';private initing=false;
  get centerName(){return landmarkName(this.city);}
+ private pack?:SpritePack;
  get description(){return this.kind==='country'?'Карта России на географической основе. Выбор городов доступен в списке.':this.kind==='city'?`${this.city?.name??'Город'}. Постоянный центр: ${this.centerName}. Улицы доступны на карте и в списке.`:'Изометрическая застройка. Стрелки — перемещение, плюс и минус — масштаб. Доступный список объектов находится рядом.';}
  ngAfterViewInit(){void this.initialize();}ngOnChanges(){this.draw();}ngOnDestroy(){this.dead=true;this.observer?.disconnect();this.app?.destroy(true,{children:true});}
- async initialize(){if(this.initing||this.app||this.dead)return;this.initing=true;this.error.set('');const app=new Application();try{await app.init({preference:'webgl',backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false,width:this.surface.nativeElement.clientWidth,height:this.surface.nativeElement.clientHeight});if(this.dead){app.destroy(true,{children:true});return;}this.app=app;this.surface.nativeElement.append(app.canvas);app.stage.addChild(this.root);this.observer=new ResizeObserver(()=>{app.renderer.resize(this.surface.nativeElement.clientWidth,this.surface.nativeElement.clientHeight);this.fit();});this.observer.observe(this.surface.nativeElement);const host=this.surface.nativeElement;host.addEventListener('pointerdown',this.down);host.addEventListener('pointermove',this.move);host.addEventListener('pointerup',this.up);host.addEventListener('pointercancel',this.up);host.addEventListener('lostpointercapture',this.up);host.addEventListener('wheel',this.wheel,{passive:false});this.draw();}catch(e){this.error.set('Графика недоступна. Попробуйте включить WebGL или повторите загрузку. Списки навигации остаются доступны.');console.error(e);}finally{this.initing=false;}}
+ async initialize(){if(this.initing||this.app||this.dead)return;this.initing=true;this.error.set('');const app=new Application();try{this.pack=await loadSpritePack();if(this.dead)return;await app.init({preference:'webgl',backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false,width:this.surface.nativeElement.clientWidth,height:this.surface.nativeElement.clientHeight});if(this.dead){app.destroy(true,{children:true});return;}this.app=app;this.surface.nativeElement.append(app.canvas);app.stage.addChild(this.root);this.observer=new ResizeObserver(()=>{app.renderer.resize(this.surface.nativeElement.clientWidth,this.surface.nativeElement.clientHeight);this.fit();});this.observer.observe(this.surface.nativeElement);const host=this.surface.nativeElement;host.addEventListener('pointerdown',this.down);host.addEventListener('pointermove',this.move);host.addEventListener('pointerup',this.up);host.addEventListener('pointercancel',this.up);host.addEventListener('lostpointercapture',this.up);host.addEventListener('wheel',this.wheel,{passive:false});this.draw();}catch(e){this.error.set('Графика недоступна. Попробуйте включить WebGL или повторите загрузку. Списки навигации остаются доступны.');console.error(e);}finally{this.initing=false;}}
  private down=(e:PointerEvent)=>{if(!e.isPrimary||e.button!==0||this.pointerId!==null)return;const target=this.app?.canvas??this.surface.nativeElement;target.setPointerCapture(e.pointerId);this.captureTarget=target;this.pointerId=e.pointerId;this.dragging=true;this.moved=false;this.last={x:e.clientX,y:e.clientY};};
  private move=(e:PointerEvent)=>{if(!this.dragging||e.pointerId!==this.pointerId)return;if((e.buttons&1)===0){this.up(e);return;}const dx=e.clientX-this.last.x,dy=e.clientY-this.last.y;if(Math.abs(dx)+Math.abs(dy)>2)this.moved=true;this.root.x+=dx;this.root.y+=dy;this.last={x:e.clientX,y:e.clientY};this.render();};
  private up=(e:PointerEvent)=>{if(e.pointerId!==this.pointerId)return;const id=this.pointerId;this.pointerId=null;this.dragging=false;const target=this.captureTarget;this.captureTarget=undefined;if(target?.hasPointerCapture(id))target.releasePointerCapture(id);};private wheel=(e:WheelEvent)=>{e.preventDefault();this.zoom(e.deltaY<0?1.1:1/1.1);};
@@ -25,6 +27,12 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   this.app?.render();
   const host=this.surface?.nativeElement;
   if(host?.dataset){if(this.kind==='city')host.dataset['landmark']=landmarkKind(this.city);else delete host.dataset['landmark'];}
+  if(host?.dataset){
+   host.dataset['spriteAssets']=String(this.pack?.manifest.entries.length??0);
+   const counts:Record<string,number>={};
+   const visit=(container:Container)=>{for(const child of container.children){if(child instanceof Sprite)counts[child.label]=(counts[child.label]??0)+1;else if(child instanceof Container)visit(child);}};
+   visit(this.root);host.dataset['spriteInstances']=JSON.stringify(counts);
+  }
   if(host?.dataset)host.dataset['countryMarkers']=this.kind==='country'?JSON.stringify(this.countryMarkers.map(m=>{
    const b=m.label.visible?m.label.getBounds():undefined;
    return {id:m.id,x:this.root.x+m.x*this.root.scale.x,y:this.root.y+m.y*this.root.scale.y,label:b?{x:b.x,y:b.y,width:b.width,height:b.height}:undefined};
@@ -33,23 +41,14 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  private poly(g:Graphics,p:number[],color:number,alpha=1){g.poly(p).fill({color,alpha});}
  private iso(x:number,y:number,z=0){return{x:x-y,y:(x+y)*.48-z};}
  private tile(g:Graphics,x:number,y:number,w:number,d:number,color:number){const a=this.iso(x,y),b=this.iso(x+w,y),c=this.iso(x+w,y+d),e=this.iso(x,y+d);this.poly(g,[a.x,a.y,b.x,b.y,c.x,c.y,e.x,e.y],color);}
- private tree(g:Graphics,x:number,y:number){const p=this.iso(x,y);g.ellipse(p.x+7,p.y+3,14,6).fill({color:0x213a36,alpha:.09});g.rect(p.x-1,p.y-17,3,18).fill(0x8a8270);g.ellipse(p.x,p.y-22,11,16).fill(0x789b7c);g.ellipse(p.x-4,p.y-26,7,10).fill(0x9bb38b);}
- private building(g:Graphics,x:number,y:number,tier:number,seed:number,pending=false,scale=1){
-  const heights=[0,19,34,49,68,91,122,158,202];const h=heights[Math.min(8,Math.max(1,tier))]*scale,w=(tier>5?31:43)*scale,d=(tier===3?50:37)*scale;
-  const a=this.iso(x,y),b=this.iso(x+w,y),c=this.iso(x+w,y+d),e=this.iso(x,y+d);const warm=seed%3===0;const front=pending?0xbea080:tier>4?0x83a3b5:warm?0xcabca6:0xe5ded0;const side=pending?0xa28670:tier>4?0x526e88:warm?0xa49783:0xb8b6ac;
-  this.poly(g,[e.x,e.y,c.x,c.y,c.x+60*scale,c.y+9*scale,e.x+60*scale,e.y+9*scale],0x21374d,.10);
-  this.poly(g,[a.x,a.y-h,b.x,b.y-h,b.x,b.y,a.x,a.y],front);this.poly(g,[b.x,b.y-h,c.x,c.y-h,c.x,c.y,b.x,b.y],side);this.poly(g,[a.x,a.y-h,b.x,b.y-h,c.x,c.y-h,e.x,e.y-h],tier>4?0xbad0d4:0xf3eadd);
-  // Face facing the viewer; shaded side plus a visible roof make all three planes legible.
-  this.poly(g,[e.x,e.y-h,c.x,c.y-h,c.x,c.y,e.x,e.y],front);
-  for(let z=8*scale;z<h-5*scale;z+=9*scale){for(let col=0;col<3;col++){const k=(col+1)/4;let px=e.x+(c.x-e.x)*k,py=e.y+(c.y-e.y)*k-z;g.poly([px,py,px+4*scale,py+2*scale,px+4*scale,py-2*scale,px,py-4*scale]).fill((col+seed)%4===0?0xefdda5:0x668391);px=b.x+(c.x-b.x)*k;py=b.y+(c.y-b.y)*k-z;g.poly([px,py,px-3*scale,py+1.5*scale,px-3*scale,py-3*scale,px,py-4.5*scale]).fill(0x36546b);}}
-  if(tier===1){const ridge=this.iso(x+w/2,y+d/2,h+12*scale);this.poly(g,[a.x,a.y-h,b.x,b.y-h,ridge.x,ridge.y],0x6f8689);this.poly(g,[b.x,b.y-h,c.x,c.y-h,ridge.x,ridge.y],0x536b70);}
-  if(tier===2||tier===4)this.tile(g,x+8*scale,y+7*scale,21*scale,20*scale,0xb9b9ac);
-  if(tier>=5){this.buildCrown(g,x,y,w,d,h,tier,scale);}
-  if(pending){const p=this.iso(x,y+d+8);g.roundRect(p.x-23,p.y-8,72,18,4).fill(0xe5bf71);const label=new Text({text:'Под снос',style:{fontFamily:'Manrope Variable, sans-serif',fontSize:10,fontWeight:'600',fill:0x59451f}});label.position.set(p.x-18,p.y-6);this.root.addChild(label);}
+ private tree(g:Graphics,x:number,y:number){const p=this.iso(x,y);this.pack!.place(g.parent??this.root,Math.round(x+y)%3===0?'tree-conifer':'tree-broadleaf',p.x,p.y);}
+ private shrub(g:Graphics,x:number,y:number){const p=this.iso(x,y);this.pack!.place(g.parent??this.root,'shrub',p.x,p.y);}
+ private building(g:Graphics,x:number,y:number,tier:number,_seed:number,pending=false,scale=1){
+  const p=this.iso(x+22*scale,y+22*scale);const sprite=this.pack!.place(g.parent??this.root,houseSpriteId(tier),p.x,p.y,scale);
+  if(pending){sprite.tint=0xc7b394;const badge=this.iso(x,y+37*scale+8),flag=new Graphics();flag.roundRect(badge.x-23,badge.y-8,72,18,4).fill(0xe5bf71);const label=new Text({text:'Под снос',style:{fontFamily:'Manrope Variable, sans-serif',fontSize:10,fontWeight:'600',fill:0x59451f}});label.position.set(badge.x-18,badge.y-6);(g.parent??this.root).addChild(flag,label);}
  }
- private buildCrown(g:Graphics,x:number,y:number,w:number,d:number,h:number,tier:number,s:number){const p=this.iso(x+w/2,y+d/2,h);g.rect(p.x-7*s,p.y-12*s,14*s,12*s).fill(0x6c8c9f);if(tier>=7){g.moveTo(p.x,p.y-12*s).lineTo(p.x,p.y-(tier===8?42:25)*s).stroke({color:0x54758b,width:2*s});g.circle(p.x,p.y-12*s,3*s).fill(0xb9cfad);}}
- private parking(g:Graphics,x:number,y:number,spaces:number){this.tile(g,x,y,65,65,0x929d9b);for(let i=0;i<10;i++){const px=x+5+(i%2)*31,py=y+5+Math.floor(i/2)*11;this.tile(g,px,py,25,1,0xd9ddd3);if(i<spaces){this.tile(g,px+3,py+2,17,7,[0x416889,0xd7d2bb,0x71897b,0xbc8569][i%4]);this.tile(g,px+8,py+3,6,5,0xaec4c7);}}}
- private landmark(g:Graphics,x:number,y:number){this.tile(g,x-25,y-25,140,140,0xd8d5c4);this.tile(g,x-10,y-10,110,110,0xeae4d4);this.building(g,x+16,y+16,2,2,false,1.25);const p=this.iso(x+46,y+45,66);g.circle(p.x,p.y,14).fill(0x647d86);g.circle(p.x,p.y-1,9).fill(0xece5d0);g.moveTo(p.x,p.y-7).lineTo(p.x,p.y).lineTo(p.x+5,p.y+3).stroke({color:0x415c72,width:2});for(const [a,b] of [[-15,85],[80,-15],[92,90]])this.tree(g,x+a,y+b);}
+ private parking(g:Graphics,x:number,y:number,spaces:number){const id=parkingSpriteId(spaces);if(id){const p=this.iso(x+32.5,y+32.5);this.pack!.place(g.parent??this.root,id,p.x,p.y);}}
+ private landmark(g:Graphics,x:number,y:number){const p=this.iso(x+45,y+45);this.pack!.place(g.parent??this.root,'center-generic',p.x,p.y,.6);}
  private draw(){if(!this.app)return;this.ready.set(false);const key=this.kind+this.city?.id+this.street?.id;const changed=key!==this.key;this.key=key;this.root.removeChildren().forEach(c=>c.destroy({children:true}));if(this.kind==='country')this.country();else if(this.kind==='city'&&this.city)this.cityScene(this.city);else if(this.street)this.streetScene(this.street);if(changed)this.fit();else this.render();this.ready.set(true);}
  private country(){
   this.countryMarkers=[];
@@ -87,13 +86,33 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   this.root.addChild(markerLayer);
  }
  private cityScene(city:City){const ground=new Graphics();this.root.addChild(ground);this.tile(ground,-65,-65,1020,910,0xe0e2d4);this.tile(ground,-42,-42,974,864,0xf1eee3);this.tile(ground,-42,365,974,55,0xa8c4c3);this.tile(ground,410,-42,45,864,0xc4c7bb);
-  city.streets.forEach((s,i)=>{const {x,y}=cityBlockPosition(i);const cluster=new Container();const g=new Graphics();cluster.addChild(g);this.tile(g,x,y,100,105,0xe0dfd0);this.tile(g,x,y+85,109,16,0xa9b0aa);s.houses.slice(0,5).forEach((h,j)=>this.building(g,x+8+(j%3)*29,y+12+Math.floor(j/3)*32,h.tier,i+j,h.status==='pending_demolition',.49));s.parking.slice(0,1).forEach(p=>{this.tile(g,x+65,y+45,26,28,0x899b98);});this.tree(g,x+92,y+16);cluster.eventMode='static';cluster.cursor='pointer';const a=this.iso(x,y),b=this.iso(x+105,y+105);cluster.hitArea=new Rectangle(a.x-108,a.y-95,215,b.y-a.y+100);cluster.on('pointertap',()=>{if(!this.moved)this.streetSelect.emit(s);});this.root.addChild(cluster);if(s.name){const p=this.iso(x,y+103);const label=new Text({text:s.name,style:{fontSize:8,fill:0x36526a,fontFamily:'sans-serif'}});label.position.set(p.x,p.y+3);this.root.addChild(label);}});
-  const center=new Graphics();drawCityLandmark(center,430,440,landmarkKind(city));this.root.addChild(center);
+  city.streets.forEach((s,i)=>{
+   const {x,y}=cityBlockPosition(i),cluster=new Container(),g=new Graphics();cluster.addChild(g);
+   this.pack!.ground(cluster,'grass',x,y,100,105);this.pack!.ground(cluster,'road-straight',x,y+85,109,16);
+   s.houses.slice(0,5).forEach((h,j)=>this.building(g,x+8+(j%3)*29,y+12+Math.floor(j/3)*32,h.tier,i+j,h.status==='pending_demolition',.49));
+   s.parking.slice(0,1).forEach(p=>{const id=parkingSpriteId(p.spaces);if(id){const spot=this.iso(x+78,y+59);this.pack!.place(cluster,id,spot.x,spot.y,.4);}});
+   this.tree(g,x+92,y+16);cluster.eventMode='static';cluster.cursor='pointer';
+   const a=this.iso(x,y),b=this.iso(x+105,y+105);cluster.hitArea=new Rectangle(a.x-108,a.y-95,215,b.y-a.y+100);
+   cluster.on('pointertap',()=>{if(!this.moved)this.streetSelect.emit(s);});this.root.addChild(cluster);
+   if(s.name){const p=this.iso(x,y+103);const label=new Text({text:s.name,style:{fontSize:8,fill:0x36526a,fontFamily:'sans-serif'}});label.position.set(p.x,p.y+3);this.root.addChild(label);}
+  });
+  const center=this.iso(485,505);this.pack!.place(this.root,`center-${landmarkKind(city)}` as SpriteId,center.x,center.y);
  }
  private streetScene(street:Street){const g=new Graphics();this.root.addChild(g);const max=Math.max(11,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex)),rows=Math.floor(max/6)+1;
  this.tile(g,-70,-85,790,rows*126+180,0xdde1d2);this.tile(g,-50,-65,750,rows*126+140,0xece9dc);
- for(let row=0;row<rows;row++){this.tile(g,-50,row*126+83,750,32,0x929d9c);this.tile(g,-50,row*126+79,750,4,0xd2d0c2);this.tile(g,-50,row*126+115,750,5,0xd2d0c2);for(let xx=-30;xx<680;xx+=45)this.tile(g,xx,row*126+98,22,1.5,0xdedfd3);for(let zz=0;zz<6;zz++)this.tile(g,315,row*126+85+zz*5,24,2,0xf6f1df);}
- const occupied=new Set([...street.houses,...street.parking].map(h=>h.lotIndex));for(let i=0;i<=max;i++){const p=lotPosition(i);this.tile(g,p.x-5,p.y-5,88,80,occupied.has(i)?0xd4d8c8:0xdce1ce);if(!occupied.has(i)){this.tile(g,p.x+5,p.y+7,55,46,0xe5e6d5);this.tree(g,p.x+55,p.y+24);}this.tree(g,p.x+81,p.y+73);}
+ const terrain=new Container();this.root.addChild(terrain);
+ for(let row=0;row<rows;row++)for(let xx=-50;xx<700;xx+=88){
+  const width=Math.min(88,700-xx);
+  this.pack!.ground(terrain,xx===302?'road-crossing':'road-straight',xx,row*126+83,width,32);
+  this.pack!.ground(terrain,'sidewalk',xx,row*126+79,width,4);
+  this.pack!.ground(terrain,'sidewalk',xx,row*126+115,width,5);
+ }
+ const occupied=new Set([...street.houses,...street.parking].map(h=>h.lotIndex));
+ for(let i=0;i<=max;i++){
+  const p=lotPosition(i);this.pack!.ground(terrain,occupied.has(i)?'grass':'vacant-lot',p.x-5,p.y-5,88,80);
+  if(!occupied.has(i))this.tree(g,p.x+55,p.y+24);
+  this.tree(g,p.x+81,p.y+73);this.shrub(g,p.x+66,p.y+70);
+ }
  this.landmark(g,690,30);const items=[...street.houses.map(h=>({lot:h.lotIndex,house:h})),...street.parking.map(p=>({lot:p.lotIndex,park:p}))].sort((a,b)=>{const x=lotPosition(a.lot),y=lotPosition(b.lot);return x.x+x.y-y.x-y.y;});for(const item of items){const p=lotPosition(item.lot);if('house'in item)this.building(g,p.x+12,p.y+10,item.house!.tier,item.lot,item.house!.status==='pending_demolition');else this.parking(g,p.x+5,p.y+3,item.park!.spaces);}
  }
 }

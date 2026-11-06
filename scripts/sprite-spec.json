@@ -1,0 +1,248 @@
+[
+  {
+    "id": "house-01",
+    "title": "Городской дом",
+    "group": "houses",
+    "sourceFile": "new/house_01.svg",
+    "width": 349,
+    "height": 357,
+    "anchorX": 175.5,
+    "anchorY": 269.16,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.27256208
+  },
+  {
+    "id": "house-02",
+    "title": "Жилой квартал",
+    "group": "houses",
+    "sourceFile": "new/house_02.svg",
+    "width": 372,
+    "height": 380,
+    "anchorX": 187,
+    "anchorY": 286.64,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.30180372
+  },
+  {
+    "id": "house-03",
+    "title": "Угловой дом",
+    "group": "houses",
+    "sourceFile": "new/house_03.svg",
+    "width": 359,
+    "height": 385,
+    "anchorX": 179,
+    "anchorY": 295.48,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.33737262
+  },
+  {
+    "id": "house-04",
+    "title": "Башня с лоджиями",
+    "group": "houses",
+    "sourceFile": "new/house_04.svg",
+    "width": 352,
+    "height": 412,
+    "anchorX": 177,
+    "anchorY": 326.44,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.34843206
+  },
+  {
+    "id": "house-05",
+    "title": "Жилая башня",
+    "group": "houses",
+    "sourceFile": "new/house_05.svg",
+    "width": 318,
+    "height": 497,
+    "anchorX": 160,
+    "anchorY": 419.6,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.32320309
+  },
+  {
+    "id": "house-06",
+    "title": "Высотный дом",
+    "group": "houses",
+    "sourceFile": "new/house_06.svg",
+    "width": 303,
+    "height": 508,
+    "anchorX": 152.5,
+    "anchorY": 434.2,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.36812675
+  },
+  {
+    "id": "house-07",
+    "title": "Башня со шпилем",
+    "group": "houses",
+    "sourceFile": "new/house_07.svg",
+    "width": 347,
+    "height": 546,
+    "anchorX": 173,
+    "anchorY": 462.36,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.39793598
+  },
+  {
+    "id": "house-08",
+    "title": "Современная высотка",
+    "group": "houses",
+    "sourceFile": "new/house_08.svg",
+    "width": 305,
+    "height": 510,
+    "anchorX": 152.5,
+    "anchorY": 433.2,
+    "pixelRatio": 1,
+    "worldPerSourcePixel": 0.47874825
+  },
+  {
+    "id": "parking-01",
+    "title": "Почти свободная",
+    "group": "parking",
+    "width": 320,
+    "height": 240,
+    "anchorX": 160,
+    "anchorY": 120,
+    "worldPerSourcePixel": 0.43
+  },
+  {
+    "id": "parking-02",
+    "title": "Наполовину занята",
+    "group": "parking",
+    "width": 320,
+    "height": 240,
+    "anchorX": 160,
+    "anchorY": 120,
+    "worldPerSourcePixel": 0.43
+  },
+  {
+    "id": "parking-03",
+    "title": "Почти заполненная",
+    "group": "parking",
+    "width": 320,
+    "height": 240,
+    "anchorX": 160,
+    "anchorY": 120,
+    "worldPerSourcePixel": 0.43
+  },
+  {
+    "id": "parking-04",
+    "title": "Полная парковка",
+    "group": "parking",
+    "width": 320,
+    "height": 240,
+    "anchorX": 160,
+    "anchorY": 120,
+    "worldPerSourcePixel": 0.43
+  },
+  {
+    "id": "center-moscow",
+    "title": "Кремлёвская площадь",
+    "group": "centers",
+    "width": 640,
+    "height": 520,
+    "anchorX": 320,
+    "anchorY": 350,
+    "worldPerSourcePixel": 0.62
+  },
+  {
+    "id": "center-vladivostok",
+    "title": "Золотой мост",
+    "group": "centers",
+    "width": 640,
+    "height": 520,
+    "anchorX": 320,
+    "anchorY": 350,
+    "worldPerSourcePixel": 0.62
+  },
+  {
+    "id": "center-generic",
+    "title": "Городская площадь",
+    "group": "centers",
+    "width": 640,
+    "height": 520,
+    "anchorX": 320,
+    "anchorY": 350,
+    "worldPerSourcePixel": 0.62
+  },
+  {
+    "id": "tree-broadleaf",
+    "title": "Лиственное дерево",
+    "group": "environment",
+    "width": 320,
+    "height": 360,
+    "anchorX": 160,
+    "anchorY": 300,
+    "worldPerSourcePixel": 0.2
+  },
+  {
+    "id": "tree-conifer",
+    "title": "Хвойное дерево",
+    "group": "environment",
+    "width": 320,
+    "height": 360,
+    "anchorX": 160,
+    "anchorY": 300,
+    "worldPerSourcePixel": 0.2
+  },
+  {
+    "id": "shrub",
+    "title": "Кустарник",
+    "group": "environment",
+    "width": 320,
+    "height": 200,
+    "anchorX": 160,
+    "anchorY": 150,
+    "worldPerSourcePixel": 0.16
+  },
+  {
+    "id": "grass",
+    "title": "Газон",
+    "group": "environment",
+    "width": 320,
+    "height": 180,
+    "anchorX": 160,
+    "anchorY": 90,
+    "worldPerSourcePixel": 0.55
+  },
+  {
+    "id": "vacant-lot",
+    "title": "Свободный участок",
+    "group": "environment",
+    "width": 320,
+    "height": 180,
+    "anchorX": 160,
+    "anchorY": 90,
+    "worldPerSourcePixel": 0.55
+  },
+  {
+    "id": "road-straight",
+    "title": "Дорога",
+    "group": "environment",
+    "width": 320,
+    "height": 180,
+    "anchorX": 160,
+    "anchorY": 90,
+    "worldPerSourcePixel": 0.55
+  },
+  {
+    "id": "road-crossing",
+    "title": "Перекрёсток",
+    "group": "environment",
+    "width": 320,
+    "height": 180,
+    "anchorX": 160,
+    "anchorY": 90,
+    "worldPerSourcePixel": 0.55
+  },
+  {
+    "id": "sidewalk",
+    "title": "Тротуар",
+    "group": "environment",
+    "width": 320,
+    "height": 180,
+    "anchorX": 160,
+    "anchorY": 90,
+    "worldPerSourcePixel": 0.55
+  }
+]
