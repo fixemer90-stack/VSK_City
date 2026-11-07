@@ -1,6 +1,13 @@
 # S03 — GitHub Actions и доказательство запуска
 
-Статус: В процессе.
+Статус: Заблокировано — GitHub отклонил push из-за отсутствующего workflow permission у PAT.
+
+Локальные кодовые commits:37d7810 и74a57fd. Повторный readback подтвердил remote main=a9574ba
+и workflows.total_count=0; ветка не обновилась, реального Actions run нет.
+Ответ GitHub: refusing to allow a Personal Access Token to create or update workflow
+.github/workflows/ci.yml without workflow scope.
+Активный токен fine-grained: требуется Repository permissions → Workflows → Read and write.
+Contents write уже позволяет обычные commits, но не заменяет это отдельное разрешение.
 
 ## Работа
 

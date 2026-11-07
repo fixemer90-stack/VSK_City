@@ -16,7 +16,8 @@
 Полный сценарий проверен через настоящий API и Chromium, включая рестарт backend.
 Это не корпоративный MVP: нет Keycloak, Kafka, реального источника и production-security.
 Переключение демо-персоны/роли не является аутентификацией.
-[CI настраивается в E02](docs/features/E02-continuous-integration/FEATURE.md); реальный Actions run ещё ожидается.
+[CI подготовлен и проверен локально в E02](docs/features/E02-continuous-integration/FEATURE.md);
+публикация workflow заблокирована отсутствующим PAT Workflows:write, Actions run ещё нет.
 
 ## Запуск питча
 
