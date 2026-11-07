@@ -20,6 +20,10 @@
 все пять GitHub Actions jobs прошли, включая lint/types/tests/build, экспорт спрайтов
 и отдельный disposable runtime для HTTP/persistence/browser. [Runbook](docs/CI.md).
 
+[E03: глубина сцены](docs/features/E03-scene-depth/FEATURE.md) исправляет перекрытие
+передних объектов центром города: общая сортировка по основанию, без изменения мира
+или исходных SVG. [Сравнение до/после](docs/pitch/scene-depth/before-after.png).
+
 ## Запуск питча
 
 Из корня репозитория, нужен Docker с Compose:

@@ -19,18 +19,18 @@
 
 | Story | Результат | Статус |
 | --- | --- | --- |
-| [S01](S01-depth-rendering.md) | Реальная сортировка отдельных объектов, layers и owner hit handling | В процессе |
-| [S02](S02-runtime-verification.md) | Read-only browser proof, безопасный rollout и зелёный CI | Не начато |
+| [S01](S01-depth-rendering.md) | Реальная сортировка отдельных объектов, layers и owner hit handling | Готово локально |
+| [S02](S02-runtime-verification.md) | Read-only browser proof, безопасный rollout и зелёный CI | Review/rollout/live10 PASS; публикация и CI ожидаются |
 
 ## Приёмка
 
-- [ ] TDD: исходная сцена проваливает регрессию порядка центр/foreground.
-- [ ] Центр имеет объекты до и после себя в общем sorted layer; высота картинки не меняет глубину.
-- [ ] Terrain/annotations не смешаны с object sorting; pending badges не блокируют выбор.
-- [ ] Москва, Владивосток и обычный центр проверены в реальном браузере.
-- [ ] Zoom/pan, foreground native click и существующие сцены/спрайты не сломаны.
-- [ ] Полные frontend gates, независимое ревью, exact candidate и screenshots проверены.
-- [ ] Frontend-only rollout не меняет operator-world/другие сервисы и пользовательские artwork WIP.
+- [x] TDD: исходная сцена проваливает регрессию порядка центр/foreground.
+- [x] Центр имеет объекты до и после себя в общем sorted layer; высота картинки не меняет глубину.
+- [x] Terrain/annotations не смешаны с object sorting; pending badges не блокируют выбор.
+- [x] Москва, Владивосток и обычный центр проверены в реальном preview-браузере.
+- [x] Zoom/pan, foreground native click и существующие сцены/спрайты не сломаны.
+- [x] Полные frontend gates, независимое ревью, exact candidate и screenshots проверены.
+- [x] Frontend-only rollout не меняет operator-world/другие сервисы; artwork WIP не включается и не откатывается.
 - [ ] Код/документы опубликованы; все jobs реального Actions run текущего кода success.
 
 Изолированные snapshots/tests и временные CI images не являются изменением operator-world.

@@ -37,15 +37,18 @@ PITCH_BASE_URL временного стенда (по умолчанию5288), 
 ## Проверка визуальных изменений без сброса мира
 
 ```sh
-PITCH_TEST_OUTPUT=../../test-results/visual npx playwright test map-centers.spec.js sprites.spec.js ten-tiers.spec.js parking.spec.js
+PITCH_TEST_OUTPUT=../../test-results/visual npx playwright test map-centers.spec.js sprites.spec.js ten-tiers.spec.js parking.spec.js depth.spec.js
 ```
 
-Эти четыре spec не создают продаж, не сбрасывают мир и не перезапускают backend.
+Эти пять spec не создают продаж, не сбрасывают мир и не перезапускают backend.
 Проверяется отсутствие исходящих записывающих запросов. Проверяются границы карты на
 1100/1280/1440/1920 px, прямые клики по всем 25 точкам, hover малого города,
 два уникальных центра, 35 PNG с прозрачностью и хешами источников, каталог и sprite instances,
 десять равномерных порогов и стабильность вариантов A/B после reload и смены вида.
 parking.spec сверяет все четыре новых исходника/PNG через HTTP и фактические parking Sprite
 на существующей улице и в городе, без создания продаж ради отсутствующих состояний.
+depth.spec проверяет общий ground-depth порядок отдельных объектов у трёх центров,
+native выбор foreground-улицы, camera zoom/pan и desktop1100/1440/1920.
+Сравниваются настоящие renderer children и stable house IDs, не фиктивные API-ответы.
 Не путать с полным `npm test`, который
 также запускает пять сценариев E01, среди которых есть изменяющие мир.

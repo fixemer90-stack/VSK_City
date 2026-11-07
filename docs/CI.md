@@ -10,11 +10,11 @@ Push в main, pull request и workflow_dispatch. Четыре независим
 
 | Job | Проверки |
 | --- | --- |
-| frontend | npm ci; ESLint; Angular typecheck; 26 unit/component tests; production build |
+| frontend | npm ci; ESLint; Angular typecheck; 34 unit/component tests; production build |
 | backend | dotnet build с warnings-as-errors; console runner с 18 assertions |
 | python | Ruff lint/format; strict mypy двух typed helpers; 5 fixture + 8 CI safety tests |
 | assets | Настоящий Chromium export: 2 контракта; побайтное совпадение 35 PNG и manifest/catalog с Git; 2 browser guard contracts (7 отказов/2 допуска до network sentinel) |
-| integration | Собственная PostgreSQL/Redis/API/frontend среда; 10 HTTP/persistence tests; все 12 Playwright cases |
+| integration | Собственная PostgreSQL/Redis/API/frontend среда; 10 HTTP/persistence tests; все 15 Playwright cases |
 
 Backend console runner — не dotnet test. Frontend не получает фиктивный backend:
 браузер работает с настоящим API; отдельный известный HTTP503 test проверяет только error UI.

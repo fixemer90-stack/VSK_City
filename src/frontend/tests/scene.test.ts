@@ -2,6 +2,9 @@ import '@angular/compiler';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {SceneComponent} from '../app/scene.ts';
+import {Container,Graphics,Sprite,Texture,Polygon} from 'pixi.js';
+import {SpritePack,SPRITE_IDS} from '../app/sprite-pack';
+import {City,Street,cityBlockPosition} from '../app/model';
 
 function fixture(){
  const scene=new SceneComponent();const internal=scene as any;
@@ -69,4 +72,77 @@ test('actual house sprites keep identity across full and thumbnail scale and exp
  internal.render();assert.equal(typeof host.dataset.houseSprites,'string');
  assert.deepEqual(JSON.parse(host.dataset.houseSprites),{'persisted-house':sprites[0].label});
  internal.root.destroy({children:true});
+});
+
+function depthFixture(){
+ const f=fixture();(f.scene.surface.nativeElement as any).dataset={};const entries=SPRITE_IDS.map(id=>({id,file:`${id}.png?v=${'0'.repeat(12)}`,width:1,height:1,anchorX:.5,anchorY:.8,worldScale:.22,pixelRatio:2,sha256:'0'.repeat(64)}));
+ f.internal.pack=new SpritePack({version:1,entries},new Map(SPRITE_IDS.map(id=>[id,Texture.WHITE])));return f;
+}
+function street(index:number):Street{return {id:`street-${index}`,agentId:`agent-${index}`,name:null,scenario:'mixed',houses:[{id:`house-${index}`,lotIndex:0,xp:100,tier:10,floors:25,status:'active',demolishAt:null}],parking:[{id:`parking-${index}`,lotIndex:1,spaces:10}]};}
+function city():City{return {id:'city',name:'Москва',mapX:0,mapY:0,streets:Array.from({length:50},(_,i)=>street(i))};}
+function sprites(container:Container):Sprite[]{return container.children.flatMap(c=>c instanceof Sprite?[c]:sprites(c));}
+type DepthEntry={sprite:string;identity?:string;streetId?:string;depth:number;x:number;y:number;screenX:number;screenY:number;drawIndex:number};
+function ordered(items:Sprite[]){assert.ok(items.every((s,i)=>i===0||items[i-1].y<=s.y),'every individual object must paint in projected ground-anchor order');}
+for(const [name,centerId] of [['Москва','center-moscow'],['Владивосток','center-vladivostok'],['Тула','center-generic']])test(`city ${name} globally orders individual objects on both sides of the center, not street clusters`,()=>{
+ const {scene,internal}=depthFixture();scene.kind='city';scene.city=city();scene.city.name=name;internal.cityScene(scene.city);internal.render();
+ const items=sprites(internal.root).filter(s=>!['grass','road-straight'].includes(s.label));ordered(items);
+ const center=items.findIndex(s=>s.label===centerId);assert.ok(center>0&&center<items.length-1,'center must not overpaint foreground');
+ assert.ok(items.slice(0,center).some(s=>s.label.startsWith('house-')));assert.ok(items.slice(center+1).some(s=>s.label.startsWith('house-')));
+});
+test('city flat objects retain owner clicks and polygon-only ground navigation; annotations cannot intercept',()=>{
+ const {scene,internal}=depthFixture();const c=city();c.streets[0].name='Private owner name';c.streets[0].houses[0].status='pending_demolition';internal.cityScene(c);internal.render();
+ assert.deepEqual(internal.root.children.map((c:Container)=>c.label),['terrain','objects','annotations']);
+ assert.equal(internal.annotations.eventMode,'none');assert.equal(internal.annotations.children.length,3);
+ const selected:string[]=[];scene.streetSelect.subscribe(s=>selected.push(s.id));
+ for(let i=0;i<c.streets.length;i++){
+  const footprint=internal.terrain.children[i+1] as Container;assert.ok(footprint.hitArea instanceof Polygon);const p=cityBlockPosition(i);
+  assert.ok(footprint.hitArea.contains((p.x+50)-(p.y+50),(p.x+p.y+100)*.48));
+  assert.equal(footprint.hitArea.contains((p.x-p.y),(p.x+p.y)*.48-20),false,'no elevated rectangle over adjacent streets');
+  footprint.emit('pointertap');assert.equal(selected.pop(),c.streets[i].id);
+ }
+ const metadata=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
+ metadata.forEach((entry,index)=>{if(entry.streetId){internal.objects.children[index].emit('pointertap');assert.equal(selected.pop(),entry.streetId);}});
+ internal.moved=true;internal.objects.children[0].emit('pointertap');assert.deepEqual(selected,[]);
+ assert.ok(!JSON.stringify(metadata).includes('Private owner name'));
+});
+test('street terrain stays below a single globally sorted layer including its landmark, houses, parking and trees',()=>{
+ const {scene,internal}=depthFixture();const s=street(0);s.houses.push({...s.houses[0],id:'front-house',lotIndex:23,status:'pending_demolition'});s.parking.push({id:'front-parking',spaces:2,lotIndex:22});internal.streetScene(s);internal.render();
+ assert.deepEqual(internal.root.children.map((c:Container)=>c.label),['terrain','objects','annotations']);
+ const items=internal.objects.children as Sprite[];assert.ok(items.every(s=>s instanceof Sprite));ordered(items);
+ const center=items.findIndex(s=>s.label==='center-generic');assert.ok(center>0&&center<items.length-1);
+ assert.equal(internal.annotations.children.length,2);assert.equal(internal.annotations.eventMode,'none');
+ assert.ok(sprites(internal.terrain).every(s=>['grass','vacant-lot','road-crossing','road-straight','sidewalk'].includes(s.label)));
+ const metadata=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];assert.ok(metadata.every(m=>m.streetId===s.id));
+});
+test('ground depth drives Pixi render ordering independently of height/scale, with stable ties and post-transform metadata',()=>{
+ const {scene,internal}=depthFixture();internal.layers();const g=new Graphics();internal.terrain.addChild(g);
+ internal.building(g,100,100,10,'tall',false);internal.building(g,100,100,1,'short',false);internal.building(g,300,300,1,'foreground',false,.49);
+ const insertion=[...internal.objects.children] as Sprite[];insertion[0].height=10000;insertion[1].scale.set(9);
+ internal.root.position.set(31,47);internal.root.scale.set(2);internal.render();
+ assert.equal(internal.objects.sortableChildren,true,'use Pixi sorting so renderer structure is invalidated');
+ const sorted=internal.objects.children as Sprite[];assert.deepEqual(sorted.slice(0,2),insertion.slice(0,2));ordered(sorted);
+ for(const item of sorted)assert.equal(item.zIndex,item.y,'render depth must use ground anchor, never height');
+ const metadata=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
+ assert.deepEqual(JSON.parse(scene.surface.nativeElement.dataset['sceneLayers']!),['terrain','objects','annotations']);
+ metadata.forEach((m,i)=>{assert.equal(m.drawIndex,i);assert.equal(m.depth,sorted[i].y);assert.equal(m.x,sorted[i].x);assert.equal(m.y,sorted[i].y);assert.equal(m.screenX,31+2*m.x);assert.equal(m.screenY,47+2*m.y);});
+ assert.deepEqual(metadata.map(m=>m.identity),['tall','short','foreground']);
+ internal.app={screen:{width:800,height:600},render(){}};scene.zoom(1.2);const zoomed=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
+ zoomed.forEach(m=>{assert.equal(m.screenX,internal.root.x+internal.root.scale.x*m.x);assert.equal(m.screenY,internal.root.y+internal.root.scale.y*m.y);});
+ scene.keyboard({key:'ArrowLeft',preventDefault(){}} as KeyboardEvent);const panned=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];panned.forEach((m,i)=>assert.equal(m.screenX,zoomed[i].screenX+45));
+ internal.render();assert.deepEqual(internal.objects.children,sorted);
+});
+test('returning to country clears destroyed depth layers and their metadata',()=>{
+ const {scene,internal}=depthFixture();internal.cityScene(city());internal.render();scene.kind='country';internal.key='countryundefinedundefined';internal.app={render(){}};
+ internal.draw();assert.deepEqual(JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!),[]);assert.deepEqual(JSON.parse(scene.surface.nativeElement.dataset['sceneLayers']!),[]);assert.equal(scene.ready(),true);
+});
+test('flattening preserves existing world anchors and A/B identities in city and street projections',()=>{
+ const cityView=depthFixture(),streetView=depthFixture(),c=city();cityView.internal.cityScene(c);cityView.internal.render();
+ const cityData=JSON.parse(cityView.scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
+ const center=cityData.find(m=>m.sprite==='center-moscow')!;assert.equal(center.x,485-505);assert.equal(center.y,(485+505)*.48);
+ for(let i=0;i<c.streets.length;i++){
+  const h=cityData.find(m=>m.identity===`house-${i}`)!;const p=cityBlockPosition(i);assert.equal(h.x,p.x+8+22*.49-(p.y+12+22*.49));assert.equal(h.y,((p.x+8+22*.49)+(p.y+12+22*.49))*.48);
+  assert.equal(h.streetId,c.streets[i].id);
+ }
+ streetView.internal.streetScene(c.streets[0]);streetView.internal.render();const streetData=JSON.parse(streetView.scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
+ const h=streetData.find(m=>m.identity==='house-0')!;assert.equal(h.x,12+22-(10+22));assert.equal(h.y,(12+22+10+22)*.48);assert.equal(h.sprite,cityData.find(m=>m.identity==='house-0')!.sprite);
 });

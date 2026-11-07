@@ -1,0 +1,14 @@
+{
+  "operatorRawStateByteIdentical": true,
+  "worldVersionBefore": 1553,
+  "worldVersionAfter": 1553,
+  "backendPostgresRedisIdImageStartedUnchanged": true,
+  "frontendImage": "sha256:2adef9b5c77affff54637b670e362b7d07e53d8c7c84823152aca84af24c1383",
+  "frontendRecreated": true,
+  "nativeBrowserReadOnlyCasesPassed": 10,
+  "sourceArtworkExcludedFromBuild": true,
+  "concurrentUserArtChanged": [
+    "src/frontend/public/sprites/source/house/IC_L04_A.svg",
+    "src/frontend/public/sprites/source/house/IC_L04_B.svg"
+  ]
+}
