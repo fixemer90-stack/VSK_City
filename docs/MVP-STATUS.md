@@ -24,7 +24,7 @@
 | Настоящая авторизация | Нет Keycloak; demo-персона и роли не являются безопасной аутентификацией |
 | Корпоративный источник / Kafka | Не подключены, реальный маппинг/порядок/исправления не согласованы |
 | Production-готовность | Нет; one-row схема и localhost API предназначены только для синтетического питча |
-| CI | [E02](features/E02-continuous-integration/FEATURE.md) локально проверен; GitHub отклонил workflow push без PAT Workflows:write; Actions run отсутствует |
+| CI | [E02](features/E02-continuous-integration/FEATURE.md) опубликован; первый run прошёл frontend/backend/assets, выявил Git-mode EXE001 в Python; повторный run ожидается |
 
 Проверены сохранение мира/срока после рестарта, конкурентный повтор, потеря Redis,
 worker-снос без GET и серверное скрытие чужих имён. В браузере нет подмены основного API;

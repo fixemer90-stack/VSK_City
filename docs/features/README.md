@@ -5,7 +5,7 @@
 | Feature | Назначение | Статус |
 | --- | --- | --- |
 | [E01 — Питч-прототип](E01-pitch-prototype/FEATURE.md) | Живая карта, город/улица, демонстрационные продажи и снос на вымышленных данных | Готово для локального питча |
-| [E02 — Автоматические проверки](E02-continuous-integration/FEATURE.md) | Lint/types/tests/build, спрайты и отдельный CI runtime | Локально проверено; публикация заблокирована PAT Workflows:write |
+| [E02 — Автоматические проверки](E02-continuous-integration/FEATURE.md) | Lint/types/tests/build, спрайты и отдельный CI runtime | Workflow опубликован; исправляется первый failed Python job |
 
 Корпоративная интеграция и производственный MVP не входят в E01.
 

@@ -1,13 +1,13 @@
 # S03 — GitHub Actions и доказательство запуска
 
-Статус: Заблокировано — GitHub отклонил push из-за отсутствующего workflow permission у PAT.
+Статус: В процессе — права PAT выданы, push прошёл; первый реальный run выявил EXE001.
 
-Локальные кодовые commits:37d7810 и74a57fd. Повторный readback подтвердил remote main=a9574ba
-и workflows.total_count=0; ветка не обновилась, реального Actions run нет.
-Ответ GitHub: refusing to allow a Personal Access Token to create or update workflow
-.github/workflows/ci.yml without workflow scope.
-Активный токен fine-grained: требуется Repository permissions → Workflows → Read and write.
-Contents write уже позволяет обычные commits, но не заменяет это отдельное разрешение.
+Первоначальный push был отклонён без PAT Workflows:write. После выдачи разрешения push
+9c661bf прошёл; remote tree проверен:250 blobs совпали. Run42398875221:
+frontend/backend/assets success, Python failed на EXE001, integration skipped.
+Причина: scripts/ci_stack.py и generate_demo_data.py имели shebang, но Git mode100644;
+на NTFS рабочие файлы показывали777, что скрывало различие до runner checkout.
+Исправление: записать mode100755 через git update-index --chmod=+x без отключения Ruff.
 
 ## Работа
 
@@ -26,7 +26,7 @@ Integration создаёт собственный CI project, запускает
 - [x] Backend свежий build: 0 warnings/errors; 18 assertions: PASS.
 - [x] Реальный export: 2 tests PASS, 37 generated artifacts побайтно равны baseline Git.
 - [x] S01/S02 завершены локально и final candidate прошёл необходимые review/gates.
-- [ ] Commit/push успешны, exact remote tree/readback подтверждены.
+- [x] Commit/push успешны, exact remote tree/readback подтверждены для9c661bf.
 - [ ] Все пять jobs реального Actions run завершились success; записаны SHA и URL.
 
 Наличие YAML не равно выполненному CI. Ошибку PAT/workflow permissions либо отсутствие
