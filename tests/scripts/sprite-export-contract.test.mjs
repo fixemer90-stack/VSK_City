@@ -5,6 +5,13 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=new URL('../../',import.meta.url);
 const floors=[1,3,4,5,6,9,12,14,17,25];
+const houseSources=[
+ ['IC_L01_A.svg','IC_L01_B.svg'],['IC_L03_A.svg','IC_L03_B.svg'],
+ ['IC_L04_A.svg','IC_L04_B.svg'],['IC_L05_A_II05.svg','IC_L05_B_Brick.svg'],
+ ['IC_L06_A.svg','IC_L06_B.svg'],['IC_L09_A.svg','IC_L09_B.svg'],
+ ['IC_L12_A_P42_P43.svg','IC_L12_B_P44M.svg'],['IC_L14_A_P55.svg','IC_L14_B_Erker.svg'],
+ ['IC_L17_A_Section.svg','IC_L17_B_KOPE.svg'],['IC_L25_A_KOPE_Tower.svg','IC_L25_B_Stalin_Skyscraper.svg'],
+];
 const houseIds=floors.flatMap((_,i)=>['a','b'].map(v=>`house-${String(i+1).padStart(2,'0')}-${v}`));
 const nonHouse=['parking-01','parking-02','parking-03','parking-04','center-moscow','center-vladivostok','center-generic','tree-broadleaf','tree-conifer','shrub','grass','vacant-lot','road-straight','road-crossing','sidewalk'];
 const json=async path=>JSON.parse(await readFile(new URL(path,root),'utf8'));
@@ -24,9 +31,9 @@ test('parking sources use the four user vectors with a shared lot footprint',asy
 test('exports exact 35 IDs with all 20 literal sources, native raster resolution and source identity',async()=>{
  const spec=await json('scripts/sprite-spec.json');
  assert.deepEqual(spec.map(e=>e.id).sort(),[...houseIds,...nonHouse].sort());
- for(const [i,floor] of floors.entries())for(const variant of ['a','b']){
+ for(const [i,sources] of houseSources.entries())for(const [variantIndex,variant] of ['a','b'].entries()){
   const item=spec.find(e=>e.id===`house-${String(i+1).padStart(2,'0')}-${variant}`);
-  assert.equal(item.sourceFile,`house/IC_L${String(floor).padStart(2,'0')}_${variant.toUpperCase()}.svg`);
+  assert.equal(item.sourceFile,`house/${sources[variantIndex]}`);
   const original=await readFile(new URL(`src/frontend/public/sprites/source/${item.sourceFile}`,root),'utf8');
   assert.equal(item.pixelRatio,/<image\b/.test(original)?1:2);
  }

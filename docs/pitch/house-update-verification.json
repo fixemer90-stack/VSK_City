@@ -1,0 +1,41 @@
+{
+  "checkedAt": "2026-11-07T22:07:02.001121+00:00",
+  "scope": "20 user house SVGs only; parking and archival edits excluded",
+  "checks": {
+    "assetExportContracts": 2,
+    "frontendUnitTests": 34,
+    "lint": "passed",
+    "angularTypecheck": "passed",
+    "productionBuild": "passed",
+    "readOnlyBrowserTests": 6,
+    "windowsLocalhostHttp": 200,
+    "nonHouseEntriesAndPngsUnchanged": 15,
+    "rawWorldUnchanged": true,
+    "dependencyContainerIdsUnchanged": true
+  },
+  "manifestSha256": "38930fdd3f8c5d4192da3a1747e07d17abc4f01a297f27925c104b0b9aa65f96",
+  "sources": {
+    "house/IC_L01_A.svg": "30ae758ff4204bd6adc4c04e04e6207020e9fdd2830cbb0f3cdb88f39c23ae3b",
+    "house/IC_L01_B.svg": "99f043c44ed979fc7de41dad88c6b86976bb962146fe16b158792416948398db",
+    "house/IC_L03_A.svg": "169c4906f05ef2266a7c14ea42236f028379dfd1f47b32a9e5dc779bc2c54ca5",
+    "house/IC_L03_B.svg": "ad4ee3396f0054f4f4d076cc52756a7f7c80d9ff5551e64d124858a26bceef75",
+    "house/IC_L04_A.svg": "0086eb020b35ac75036c2fd90cae3b4bbce438ddea8a2df1514b16f761f03017",
+    "house/IC_L04_B.svg": "6a8f270607048e4044c228534ccfd2731a6b0b0912f8bb08bd026b1f02d19b4d",
+    "house/IC_L05_A_II05.svg": "a7d495993a2925ff091e2f8e7b892e522bca96be93d0258d2fbfe601fad3043c",
+    "house/IC_L05_B_Brick.svg": "5c97355e7c95acd5c3d5f8f45c8a06854b21742d741d75b0d8b5f6809d8976f3",
+    "house/IC_L06_A.svg": "90c99624745901dfe8a1bb110e32cf09a79d3e622f0a03d35efedc6ed8b362b7",
+    "house/IC_L06_B.svg": "d9e0eecb0c7be508a810f0753ebaf9e703aca1e4f85cdb049f12d08a3cded82a",
+    "house/IC_L09_A.svg": "c7fe4c8dae7b96e02ad7f64863294b7f987cf0e762d838ca50349cc6c96b7360",
+    "house/IC_L09_B.svg": "72aedb3d64de35728836b6d0e604a9b06755d72817ba88355d8a5b4d7266f356",
+    "house/IC_L12_A_P42_P43.svg": "146de7c0286bac0a26b51054e1dd5f2a363e959917f494f6cd20edcfbc589c46",
+    "house/IC_L12_B_P44M.svg": "6f00e42f619e118759bd9c70c55e63929eb2c11c730c0d5991a64593f791e31f",
+    "house/IC_L14_A_P55.svg": "570ecc01a7278e28efad1d9d5f7ed14333f07cc09d3a9caba8cc43137a985a31",
+    "house/IC_L14_B_Erker.svg": "880288968729d6bf5f91b85e0e9cbeb9017e9b16d275d7f486cda1d1bc99b074",
+    "house/IC_L17_A_Section.svg": "e890b923c8f9fe2ca718fea1cfffec19871bff4b5fb8d1980e428292f1e6ff10",
+    "house/IC_L17_B_KOPE.svg": "bd8493323647f1ad3f67cee426f13474fe5a0af33390c0142a98cc513a80439b",
+    "house/IC_L25_A_KOPE_Tower.svg": "b54f890ae2217e6a8c4dac8550086a8500351c9044354811c4a8a50edc2f6f05",
+    "house/IC_L25_B_Stalin_Skyscraper.svg": "1b24b4e85f2b6490c41b22116a23357370ae68120e4b67acdbeaef9a499e5d56"
+  },
+  "screenshotsDirectory": "/home/balthier/.hermes/cache/scratch/vsk-house-update/test-results/house-update",
+  "runtimeImage": "sha256:09a3f3e91d0cddb9e773ea2b90681d2e4bf4adcbe97abca9fbc50f55893af7ff"
+}

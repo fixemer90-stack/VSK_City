@@ -6,7 +6,13 @@ test('all 35 transparent sprites include twenty original paired houses and the c
  expect(response.headers()['content-type']).toContain('application/json');
  const manifest=await response.json();expect(manifest.entries).toHaveLength(35);
  expect(new Set(manifest.entries.map(e=>e.id)).size).toBe(35);
- const floors=[1,3,4,5,6,9,12,14,17,25];
+ const sources=[
+  ['IC_L01_A.svg','IC_L01_B.svg'],['IC_L03_A.svg','IC_L03_B.svg'],
+  ['IC_L04_A.svg','IC_L04_B.svg'],['IC_L05_A_II05.svg','IC_L05_B_Brick.svg'],
+  ['IC_L06_A.svg','IC_L06_B.svg'],['IC_L09_A.svg','IC_L09_B.svg'],
+  ['IC_L12_A_P42_P43.svg','IC_L12_B_P44M.svg'],['IC_L14_A_P55.svg','IC_L14_B_Erker.svg'],
+  ['IC_L17_A_Section.svg','IC_L17_B_KOPE.svg'],['IC_L25_A_KOPE_Tower.svg','IC_L25_B_Stalin_Skyscraper.svg'],
+ ];
  for(const entry of manifest.entries){
   const image=await request.get('/sprites/'+entry.file);
   expect(image.ok()).toBe(true);expect(image.headers()['content-type']).toContain('image/png');
@@ -14,10 +20,11 @@ test('all 35 transparent sprites include twenty original paired houses and the c
   expect(createHash('sha256').update(await image.body()).digest('hex')).toBe(entry.sha256);
   if(entry.id.startsWith('house-')){
    const match=/^house-(\d{2})-([ab])$/.exec(entry.id);expect(match).toBeTruthy();
-   expect(entry.sourceFile).toBe(`house/IC_L${String(floors[Number(match[1])-1]).padStart(2,'0')}_${match[2].toUpperCase()}.svg`);
+   expect(entry.sourceFile).toBe(`house/${sources[Number(match[1])-1][match[2]==='a'?0:1]}`);
    const original=await request.get('/sprites/source/'+entry.sourceFile);
    expect(original.ok()).toBe(true);
    expect(createHash('sha256').update(await original.body()).digest('hex')).toBe(entry.sourceSha256);
+   expect(entry.pixelRatio).toBe(/<image\b/.test((await original.body()).toString())?1:2);
   }
  }
  await page.goto('/sprites/catalog.html');
