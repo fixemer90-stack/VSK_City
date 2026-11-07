@@ -41,6 +41,7 @@ test('city block positions keep all 50 streets stable outside the central 2x2 pl
 
 test('transport receives the global native-fetch receiver',async()=>{
  let receiver:unknown;
+ // eslint-disable-next-line @typescript-eslint/no-this-alias -- Capture the native-fetch receiver to assert binding, not to replace lexical this.
  const api=new DemoApi((async function(this:unknown){receiver=this;if(this!==globalThis)throw new TypeError('Illegal invocation');return new Response(JSON.stringify({cities:[],viewer:{},now:'2026-11-05T00:00:00Z'}));}) as typeof fetch);
  await api.state('agent','agent');assert.equal(receiver,globalThis);
 });

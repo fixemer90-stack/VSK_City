@@ -1,6 +1,6 @@
 import {AfterViewInit,Component,ElementRef,EventEmitter,Input,OnChanges,OnDestroy,Output,ViewChild,signal} from '@angular/core';
 import {Application,Container,Graphics,Text,Rectangle,Circle,Sprite} from 'pixi.js';
-import {City,Street,House,lotPosition,cityBlockPosition} from './model';
+import {City,Street,lotPosition,cityBlockPosition} from './model';
 import {COUNTRY_RINGS,cityPoint,LABEL_CITIES} from './country-geometry';
 import {landmarkKind,landmarkName} from './city-landmarks';
 import {SpritePack,SpriteId,houseSpriteId,parkingSpriteId,loadSpritePack} from './sprite-pack';
