@@ -1,6 +1,11 @@
 # S03 — GitHub Actions и доказательство запуска
 
-Статус: В процессе — права PAT выданы, push прошёл; первый реальный run выявил EXE001.
+Статус: Готово — все пять jobs реального Actions run завершились success.
+
+Проверенный код:00514cc2ff4cdaf7964b71b7efece069f0d8844c.
+[Зелёный run42399108571](https://github.com/fixemer90-stack/VSK_City/actions/runs/42399108571).
+Frontend26, backend18, Python13, assets4 (2export+2guard), HTTP/persistence10,
+browser12 — все прошли. Cleanup временного CI project тоже success.
 
 Первоначальный push был отклонён без PAT Workflows:write. После выдачи разрешения push
 9c661bf прошёл; remote tree проверен:250 blobs совпали. Run42398875221:
@@ -27,8 +32,8 @@ Integration создаёт собственный CI project, запускает
 - [x] Реальный export: 2 tests PASS, 37 generated artifacts побайтно равны baseline Git.
 - [x] S01/S02 завершены локально и final candidate прошёл необходимые review/gates.
 - [x] Commit/push успешны, exact remote tree/readback подтверждены для9c661bf.
-- [ ] Все пять jobs реального Actions run завершились success; записаны SHA и URL.
+- [x] Все пять jobs реального Actions run завершились success; записаны SHA и URL.
 
 Наличие YAML не равно выполненному CI. Ошибку PAT/workflow permissions либо отсутствие
 запуска нужно фиксировать отдельно, не выдавая local tests за remote success.
-После первого зелёного run статусы Story/Feature/README обновляются по факту.
+Статусы Story/Feature/README обновлены после проверенного зелёного run.

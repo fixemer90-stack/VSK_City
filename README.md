@@ -16,8 +16,9 @@
 Полный сценарий проверен через настоящий API и Chromium, включая рестарт backend.
 Это не корпоративный MVP: нет Keycloak, Kafka, реального источника и production-security.
 Переключение демо-персоны/роли не является аутентификацией.
-[CI опубликован в E02](docs/features/E02-continuous-integration/FEATURE.md);
-первый Actions run выявил Python executable-bit ошибку, исправление проверяется повторно.
+[CI настроен в E02](docs/features/E02-continuous-integration/FEATURE.md):
+все пять GitHub Actions jobs прошли, включая lint/types/tests/build, экспорт спрайтов
+и отдельный disposable runtime для HTTP/persistence/browser. [Runbook](docs/CI.md).
 
 ## Запуск питча
 

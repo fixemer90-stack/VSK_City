@@ -1,6 +1,6 @@
 # E02 CI — независимое ревью
 
-Статус: PASSED локально. Remote Actions acceptance отдельно в [S03](../features/E02-continuous-integration/S03-actions.md).
+Статус: PASSED; remote Actions acceptance завершён в [S03](../features/E02-continuous-integration/S03-actions.md).
 
 ## Scope и вердикт
 
@@ -28,7 +28,11 @@ npm ci/lint/typecheck/26tests/build PASS; production audit0. Существую�
       Тестовые тела продаж/reset/restart не запускаются, реальная сеть не используется.
 - [x] Два новых guard contracts включены в assets job; 13 Python tests и оба Node contracts PASS.
 - [x] Финальная конфигурация прошла actionlint и Python static gates.
+- [x] После публикации исправлен Git executable mode100644→100755 двух Python CLI:
+      первый runner выявил EXE001, не видимый по NTFS-mode777. Повторный run42399108571
+      на00514cc завершил все пять jobs success, без отключения правил и обхода тестов.
 
 Известное ограничение: полная dev-inclusive dependency audit имеет25moderate/5high;
 production audit0. Это не утверждение полной безопасности и не выполненный security backlog.
-Ревью не подтверждает production readiness, external auth/data contracts или remote CI result.
+Само исходное ревью не подтверждает production readiness или external auth/data contracts;
+remote CI result проверен отдельно после публикации, как указано выше.
