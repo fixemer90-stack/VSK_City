@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [E01 — Питч-прототип](E01-pitch-prototype/FEATURE.md) | Живая карта, город/улица, демонстрационные продажи и снос на вымышленных данных | Готово для локального питча |
 | [E02 — Автоматические проверки](E02-continuous-integration/FEATURE.md) | Lint/types/tests/build, спрайты и отдельный CI runtime | Готово; все пять jobs Actions success |
-| [E03 — Глубина сцены](E03-scene-depth/FEATURE.md) | Центр, дома и зелень в правильном painter order; сохранение native выбора | Rollout/live проверки готовы; Actions ожидается |
+| [E03 — Глубина сцены](E03-scene-depth/FEATURE.md) | Центр, дома и зелень в правильном painter order; сохранение native выбора | Готово; rollout/live и все пять Actions jobs success |
 
 Корпоративная интеграция и производственный MVP не входят в E01.
 

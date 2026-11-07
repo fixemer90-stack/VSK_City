@@ -1,6 +1,6 @@
 # E03 — независимое ревью сортировки
 
-Статус: PASSED для renderer candidate, rollout/remote CI проверяются в S02.
+Статус: PASSED для renderer candidate; rollout/remote CI завершены в S02.
 
 Reviewer deleg_54033a79 подтвердил SHA256 binary diff scene.ts+scene.test.ts:
 39cf7da94a834a51d635f1b64169d67c46b0ff424113a8494e02a12185c93493.
@@ -19,6 +19,9 @@ passed=true; security_concerns=[]; logic_errors=[].
       Новые tests повторно3/3 PASS на preview5298; renderer candidate при этом не изменён.
 - [x] Родитель отдельно повторил frontend lint/typecheck/34tests/build и7 прежних browser cases.
 - [x] Before/after comparison реально получен из screenshots и осмотрен для3 центров.
+- [x] Frontend-only rollout проверен live10/10 и Windows host; PG1553 побайтно сохранён.
+- [x] На опубликованном a1ed283 Actions run42405217216 завершил все пять jobs success,
+      включая полный isolated browser15/15. Новых production изменений после review не было.
 
 Историческую TDD последовательность reviewer не воспроизводил; её RED зафиксировал
 исполнитель, родитель подтвердил final candidate hash. После review изменялись только

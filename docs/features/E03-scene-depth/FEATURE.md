@@ -1,6 +1,6 @@
 # E03 — Корректная глубина изометрической сцены
 
-Статус: В процессе.
+Статус: Готово — frontend обновлён, все пять Actions jobs на a1ed283 success.
 
 ## Дефект и границы
 
@@ -19,8 +19,8 @@
 
 | Story | Результат | Статус |
 | --- | --- | --- |
-| [S01](S01-depth-rendering.md) | Реальная сортировка отдельных объектов, layers и owner hit handling | Готово локально |
-| [S02](S02-runtime-verification.md) | Read-only browser proof, безопасный rollout и зелёный CI | Review/rollout/live10 PASS; публикация и CI ожидаются |
+| [S01](S01-depth-rendering.md) | Реальная сортировка отдельных объектов, layers и owner hit handling | Готово |
+| [S02](S02-runtime-verification.md) | Read-only browser proof, безопасный rollout и зелёный CI | Готово; live10 и CI15 PASS |
 
 ## Приёмка
 
@@ -31,7 +31,7 @@
 - [x] Zoom/pan, foreground native click и существующие сцены/спрайты не сломаны.
 - [x] Полные frontend gates, независимое ревью, exact candidate и screenshots проверены.
 - [x] Frontend-only rollout не меняет operator-world/другие сервисы; artwork WIP не включается и не откатывается.
-- [ ] Код/документы опубликованы; все jobs реального Actions run текущего кода success.
+- [x] Код/документы опубликованы; все jobs реального Actions run текущего кода success.
 
 Изолированные snapshots/tests и временные CI images не являются изменением operator-world.
 Полный mutating suite допускается только disposable CI, не на рабочем vsk-pitch.

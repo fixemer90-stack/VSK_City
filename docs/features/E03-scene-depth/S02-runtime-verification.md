@@ -1,6 +1,6 @@
 # S02 — Browser, rollout и публикация
 
-Статус: В процессе — review и frontend-only rollout проверены; ожидается публикация и Actions.
+Статус: Готово — review, frontend-only rollout, публикация и Actions прошли.
 
 ## Приёмка
 
@@ -13,7 +13,7 @@
 - [x] Только frontend собран из committed assets + owned overlays; backend/PG/Redis не пересоздаются.
 - [x] Raw world, non-frontend container IDs/start time и user-art WIP проверены до/после.
       При пользовательских игровых изменениях мир не восстанавливается для equality.
-- [ ] Commit/push/readback выполнены, все пять Actions jobs точного SHA success.
+- [x] Commit/push/readback выполнены, все пять Actions jobs точного SHA success.
 
 Baseline: scratch/vsk-depth/operator-before.json (private), operator-containers.json,
 user-art-before.json. Не коммитить полный raw world или реальные секреты.
@@ -36,3 +36,9 @@ click выполнена и повторно3/3 PASS. После frontend-only r
 неизменны, frontend image соответствует проверенному preview. Raw PG1553→1553 побайтно одинаков.
 Между preview и rollout операторский мир продвинулся1519→1553 и не откатывался.
 Preview container5298 удалён. Полные mutating15cases проверяются только в Actions CI.
+
+Опубликованный код: a1ed2837003cbd1ac899e0038e578aee296f4313.
+[Actions run42405217216](https://github.com/fixemer90-stack/VSK_City/actions/runs/42405217216):
+все пять jobs success. В фактических логах подтверждены34frontend,18backend,
+13Python,10HTTP/persistence и15browser PASS; sprite export/parity и cleanup тоже success.
+Это проверка синтетического desktop-питча, не корпоративная production acceptance.
