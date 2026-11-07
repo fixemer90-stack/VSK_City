@@ -53,7 +53,8 @@ Backend health: `http://localhost:5189/health`. PostgreSQL/Redis не публи
 2. Прочитать [принятые игровые правила](docs/GAME-RULES.md) — актуальный источник формул и исключений.
 3. Прочитать [концепцию v0.4](docs/concept/Insurance_City_Concept_Architecture_v0.4.md) — продукт и целевую архитектуру.
 4. Проверить [дорожную карту](docs/ROADMAP.md) и [статус MVP](docs/MVP-STATUS.md).
-5. До реализации согласовать контракт данных и оформить Feature/Story по [шаблонам](docs/templates/README.md).
+5. Для расчёта и хранения прочитать проекты [SRS-ENGINE](docs/SRS/SRS-ENGINE.md) и [SRS-STORAGE](docs/SRS/SRS-STORAGE.md), затем оформить Feature/Story по [шаблонам](docs/templates/README.md).
+6. Внешний контракт пока отложен; подключение реального источника требует его отдельного согласования.
 
 [Версия v0.3](docs/concept/Insurance_City_Concept_Architecture_v0.3.md) сохранена без изменений
 как исторический источник, а не действующий контракт.
