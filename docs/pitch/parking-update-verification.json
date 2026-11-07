@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-11-07T22:27:21.749892+00:00",
+  "scope": "4 user parking SVGs only",
+  "assetContractsPassed": 2,
+  "frontendUnitTestsPassed": 34,
+  "lint": "passed (native)",
+  "angularTypecheck": "passed (native)",
+  "nonParkingEntriesAndPngsUnchanged": 31,
+  "deploymentComplete": false,
+  "liveBrowserAcceptance": false,
+  "blockers": [
+    "Docker build crashed with SIGBUS; Docker Desktop subsequently reported disk full; C: has zero free bytes",
+    "Native production build timed out twice",
+    "Static catalog browser check timed out; no browser pass claimed",
+    "Previously checked GitHub credential returned HTTP401; no retry with same invalid token"
+  ],
+  "sources": {
+    "parking/parking-01.svg": "ff11e076e469fdfe7e8680963a08ecc70a6ba34a04934147fe3d3a73ced7a5d5",
+    "parking/parking-02.svg": "369e2f5db2adb0ca86e4505024eb317cf230a5722a1206ddb7f30a878a27b47f",
+    "parking/parking-03.svg": "f3efc7c14957d0819c208f697e16f35d90309f91f80c057a1fcd1dd8f1f5adba",
+    "parking/parking-04.svg": "0d7f0f69ccdef94d0a4519467a03748475edbd97cb37ccd96c5d5208a28ec76b"
+  }
+}

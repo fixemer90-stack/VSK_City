@@ -2,14 +2,14 @@ import {test,expect} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 
-test('four user parking vectors match the live PNG pack and real street occupancy',async({page,request},info)=>{
+test('four user parking SVGs match the live native PNG pack and real street occupancy',async({page,request},info)=>{
  const writes=[],errors=[];
  page.on('request',r=>{if(!['GET','HEAD','OPTIONS'].includes(r.method()))writes.push(r.url());});
  page.on('pageerror',e=>errors.push(e.message));
  const manifest=await(await request.get('/sprites/manifest.json')).json();
  const parking=manifest.entries.filter(e=>e.group==='parking');expect(parking).toHaveLength(4);
  for(const entry of parking){
-  expect(entry.sourceFile).toBe(`parking/${entry.id}.svg`);expect(entry.pixelRatio).toBe(2);
+  expect(entry.sourceFile).toBe(`parking/${entry.id}.svg`);expect(entry.pixelRatio).toBe(1);
   expect(entry.width*entry.worldScale).toBeGreaterThan(125);expect(entry.width*entry.worldScale).toBeLessThan(145);
   const original=await readFile(new URL(`../../src/frontend/public/sprites/source/${entry.sourceFile}`,import.meta.url));
   const source=await request.get('/sprites/source/'+entry.sourceFile);expect(source.ok()).toBe(true);
