@@ -25,6 +25,17 @@ Test("ten uniform thresholds cover every XP and both sides of every boundary", (
         Check(s.Houses[0].Xp == threshold - 1 && s.Houses[0].Tier == tier - 1 && s.Houses[0].Floors == floors[tier - 2], $"termination below {threshold}");
     }
 });
+Test("motor-100 equals one hundred regular motor actions", () =>
+{
+    foreach (var houses in new[] { 0, 1, 3 })
+    {
+        var batch = Empty(); var sequential = Empty();
+        Add(batch, "property", houses); Add(sequential, "property", houses);
+        Add(batch, "motor", 97); Add(sequential, "motor", 97);
+        Add(batch, "motor-100"); Add(sequential, "motor", 100);
+        Check(System.Text.Json.JsonSerializer.Serialize(batch) == System.Text.Json.JsonSerializer.Serialize(sequential), "exact allocation and overflow parity");
+    }
+});
 Test("motor selects lowest XP stable ID", () => { var s = Empty(); Add(s, "property", 10); Add(s, "motor", 23); Check(s.Houses.Count(h => h.Xp == 3) == 3 && s.Houses.Count(h => h.Xp == 2) == 7, "balanced XP"); Check(s.Houses[0].Xp == 3, "stable ID"); });
 Test("overflow uses sequential ten-space modules", () => { var s = Empty(); Add(s, "property"); Add(s, "motor", 123); Check(s.Houses[0].Xp == 100 && s.Parking.Select(p => p.Spaces).SequenceEqual(new[] { 10, 10, 3 }), "overflow"); });
 Test("new property transfers parking without changing old XP", () => { var s = Empty(); Add(s, "motor", 123); Add(s, "property"); Check(s.Houses[0].Xp == 100 && s.Parking.Sum(p => p.Spaces) == 23, "first transfer"); Add(s, "property"); Check(s.Houses[0].Xp == 100 && s.Houses[1].Xp == 23 && s.Parking.Count == 0, "second transfer"); });
@@ -77,6 +88,18 @@ World seeded = null!;
 Test("CSV seed is exact 25x50, 4175 houses and 28775 motor", () => { seeded = demo.Seed(); Check(seeded.Cities.Count == 25 && seeded.Cities.All(c => c.Streets.Count == 50), "cities and streets"); Check(seeded.SeedPropertyContracts == 4175 && seeded.SeedMotorContracts == 28775, "contract counts"); Check(seeded.Cities.SelectMany(c => c.Streets).Sum(s => s.Houses.Count) == 4175, "one contract one house"); Check(seeded.Cities.SelectMany(c => c.Streets).Sum(s => s.Houses.Sum(h => h.Xp) + s.Parking.Sum(p => p.Spaces)) == 28775, "motor conserved"); });
 Test("privacy projection has no hidden names or internal fields", () => { var opts = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web); using var doc = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(demo.Project(seeded, "TEST-AGENT-001-044", "agent", now), opts)); var root = doc.RootElement; Check(root.GetProperty("mode").GetString() == "pitch", "mode"); Check(root.GetProperty("cities").EnumerateArray().SelectMany(c => c.GetProperty("streets").EnumerateArray()).Count(s => s.GetProperty("name").ValueKind != System.Text.Json.JsonValueKind.Null) == 1, "only own name"); Check(!root.TryGetProperty("agents", out _) && !root.TryGetProperty("requests", out _), "no internal metadata"); foreach (var s in root.GetProperty("cities").EnumerateArray().SelectMany(c => c.GetProperty("streets").EnumerateArray())) Check(s.EnumerateObject().Select(p => p.Name).Order().SequenceEqual(new[] { "id", "agentId", "name", "scenario", "houses", "parking" }.Order()), "exact street fields"); using var director = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(demo.Project(seeded, "TEST-AGENT-001-044", "director", now), opts)); Check(director.RootElement.GetProperty("cities").EnumerateArray().SelectMany(c => c.GetProperty("streets").EnumerateArray()).Count(s => s.GetProperty("name").ValueKind != System.Text.Json.JsonValueKind.Null) == 50, "director city only"); });
 Test("idempotency survives JSON roundtrip and protects deadlines", () => { var w = demo.Seed(); var a = "TEST-AGENT-001-044"; var action = new DemoAction(a, "terminate-property", "request-1"); demo.Act(w, a, "agent", action, now); var s = w.Cities[0].Streets.Single(s => s.AgentId == a); var deadline = s.Houses.Single(h => h.Status == "pending_demolition").DemolishAt; w = System.Text.Json.JsonSerializer.Deserialize<World>(System.Text.Json.JsonSerializer.Serialize(w))!; Check(!demo.Act(w, a, "agent", action, now.AddHours(1)), "duplicate no mutation"); s = w.Cities[0].Streets.Single(s => s.AgentId == a); Check(s.Houses.Count(h => h.Status == "pending_demolition") == 1 && s.Houses.Single(h => h.Status == "pending_demolition").DemolishAt == deadline, "deadline persisted"); });
+Test("motor-100 is one idempotent agent-only action", () =>
+{
+    var w = demo.Seed(); var a = "TEST-AGENT-001-001";
+    var street = w.Cities.SelectMany(c => c.Streets).Single(s => s.AgentId == a);
+    int before = street.Houses.Sum(h => h.Xp) + street.Parking.Sum(p => p.Spaces);
+    long version = w.Version; var action = new DemoAction(a, "motor-100", "batch-100");
+    Check(demo.Act(w, a, "agent", action, now), "batch accepted");
+    Check(street.Houses.Sum(h => h.Xp) + street.Parking.Sum(p => p.Spaces) == before + 100 && w.Version == version + 1, "exact hundred in one version");
+    Check(!demo.Act(w, a, "agent", action, now), "retry is idempotent");
+    try { demo.Act(w, a, "director", new(a, "motor-100", "director-batch"), now); throw new Exception("expected rejection"); }
+    catch (DemoException e) { Check(e.Status == 403, "director forbidden"); }
+});
 Test("reset is idempotent and retains old request receipts", () => { var w = demo.Seed(); var a = "TEST-AGENT-001-001"; demo.Act(w, a, "agent", new(a, "property", "before-reset"), now); demo.Act(w, a, "director", new(a, "reset", "reset-key"), now); demo.Act(w, a, "agent", new(a, "property", "after-reset"), now); Check(!demo.Act(w, a, "director", new(a, "reset", "reset-key"), now), "duplicate reset"); Check(!demo.Act(w, a, "agent", new(a, "property", "before-reset"), now), "receipt survives reset"); Check(w.Cities[0].Streets[0].Houses.Count == 1, "duplicate reset does not erase new sale"); });
 Test("director observer and request validation", () => { var w = demo.Seed(); var a = "TEST-AGENT-001-044"; foreach (var item in new[] { ("director", new DemoAction(a, "motor", "x"), 403), ("agent", new DemoAction(a, "bogus", "x"), 400), ("agent", new DemoAction(a, "motor", ""), 400), ("agent", new DemoAction("TEST-AGENT-002-001", "motor", "x"), 403), ("invalid", new DemoAction(a, "motor", "x"), 400) }) { try { demo.Act(w, a, item.Item1, item.Item2, now); throw new Exception("expected rejection"); } catch (DemoException e) { Check(e.Status == item.Item3, "status"); } } });
 Console.WriteLine($"TOTAL {passed} passed");

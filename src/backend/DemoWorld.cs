@@ -5,7 +5,7 @@ public sealed record DemoAction(string AgentId, string Type, string RequestId);
 public sealed class DemoWorld(Engine engine, string seedPath)
 {
     public const string DefaultAgent = "TEST-AGENT-001-044";
-    public static readonly string[] Actions = ["property", "motor", "terminate-property", "terminate-motor", "advance-day", "reset"];
+    public static readonly string[] Actions = ["property", "motor", "motor-100", "terminate-property", "terminate-motor", "advance-day", "reset"];
     public World Seed()
     {
         var world = new World();

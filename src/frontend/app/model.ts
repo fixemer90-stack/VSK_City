@@ -1,5 +1,5 @@
 export type Role = 'agent' | 'director';
-export type Action = 'property'|'motor'|'terminate-property'|'terminate-motor'|'advance-day'|'reset';
+export type Action = 'property'|'motor'|'motor-100'|'terminate-property'|'terminate-motor'|'advance-day'|'reset';
 export interface House {id:string;lotIndex:number;xp:number;tier:number;floors:number;status:'active'|'pending_demolition';demolishAt:string|null}
 export interface Parking {id:string;lotIndex:number;spaces:number}
 export interface Street {id:string;agentId:string;name:string|null;scenario:string;houses:House[];parking:Parking[]}

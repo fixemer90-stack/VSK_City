@@ -42,6 +42,30 @@ async function action(request, type, requestId = `browser-${crypto.randomUUID()}
   return response.json();
 }
 
+test('bulk motor button adds exactly 100 once and survives reload', async ({page,request},info) => {
+  await page.goto('/');
+  await page.getByTestId('demo-scenario').selectOption(AGENT);
+  const button=page.getByTestId('action-motor-100');await expect(button).toBeEnabled();
+  const before=await (await request.get(`/api/demo/state?${query}`)).json();
+  const responsePromise=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().includes('/api/demo/actions'));
+  await button.click();const response=await responsePromise;expect(response.ok()).toBe(true);
+  const payload=response.request().postDataJSON();expect(payload.type).toBe('motor-100');
+  const after=await response.json();expect(motorContribution(own(after))).toBe(motorContribution(own(before))+100);
+  expect(after.version).toBe(before.version+1);
+  const replay=await request.post(`/api/demo/actions?${query}`,{data:payload});expect(replay.ok()).toBe(true);
+  expect((await replay.json()).version).toBe(after.version);
+  await page.reload();await expect(button).toBeEnabled();
+  await expect(page.getByTestId('scene-surface')).toHaveAttribute('data-ready','true');
+  const persisted=await (await request.get(`/api/demo/state?${query}`)).json();
+  expect(motorContribution(own(persisted))).toBe(motorContribution(own(after)));
+  for(const width of [1100,1280,1440]){
+    await page.setViewportSize({width,height:960});await expect(button).toBeInViewport();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await page.screenshot({path:info.outputPath(`motor100-${width}.png`)});
+  }
+  await page.getByTestId('demo-role').selectOption('director');await expect(button).toHaveCount(0);
+});
+
 test('real API: seed, privacy, progression, delayed demolition and retry protection', async ({ request }) => {
   const health = await request.get('/health');
   expect(health.ok(), await health.text()).toBeTruthy();

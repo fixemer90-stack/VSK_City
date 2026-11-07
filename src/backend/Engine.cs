@@ -66,6 +66,7 @@ public sealed class Engine
                 while (added.Xp < 100 && street.Parking.Count > 0) { RemoveParking(street); added.Xp++; }
                 break;
             case "motor": AddXp(street); break;
+            case "motor-100": for (int i = 0; i < 100; i++) AddXp(street); break;
             case "terminate-property":
                 var pending = street.Houses.Where(h => h.Status == "active").OrderBy(h => h.Xp).ThenBy(h => h.Id, StringComparer.Ordinal).FirstOrDefault()
                     ?? throw new DemoException(409, "Нет активного дома для расторжения.");

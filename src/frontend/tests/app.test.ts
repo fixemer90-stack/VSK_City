@@ -2,7 +2,27 @@ import '@angular/compiler';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {AppComponent} from '../app/app.ts';
+import {readFileSync} from 'node:fs';
 import {DemoApi} from '../app/model.ts';
+
+test('demo dock provides a guarded +100 motor action beside single motor',()=>{
+ const html=readFileSync(new URL('../app/app.html',import.meta.url),'utf8');
+ assert.match(html,/data-testid="action-motor-100"[^>]*\[disabled\]="busy\(\)\|\|!!pending\(\)\|\|!state\(\)"[^>]*\(click\)="act\('motor-100'\)"/);
+ assert.match(html,/＋100.*Мотор/);
+});
+
+test('bulk motor retries exactly the same single request after uncertain response',async()=>{
+ const app=new AppComponent();const bodies:string[]=[];
+ (app as any).api=new DemoApi((async(_url:RequestInfo|URL,init?:RequestInit)=>{
+  bodies.push(String(init?.body));return new Response(JSON.stringify(bodies.length===1?null:world));
+ }) as typeof fetch);
+ try{
+  await app.act('motor-100');assert.ok(app.pending());
+  await app.act('motor-100');assert.equal(bodies.length,1);
+  await app.act('motor-100',true);assert.equal(bodies.length,2);
+  assert.equal(bodies[1],bodies[0]);assert.equal(JSON.parse(bodies[0]).type,'motor-100');assert.equal(app.pending(),null);
+ }finally{app.ngOnDestroy();}
+});
 
 const world={mode:'pitch',version:2,now:'2026-11-05T00:00:00Z',viewer:{agentId:'TEST-AGENT-001-044',streetId:'street',cityId:'city',firstName:'Имя',lastName:'Фамилия',role:'agent'},cities:[]};
 
