@@ -9,6 +9,10 @@ const STREET = `STREET-${AGENT}`;
 const query = `agentId=${AGENT}&role=agent`;
 
 test.beforeAll(async ({ request, baseURL }) => {
+  if (process.env.PITCH_ALLOW_MUTATIONS !== '1') throw new Error('Mutating pitch tests require explicit disposable CI opt-in');
+  const helper = fileURLToPath(new URL('../../scripts/ci_stack.py', import.meta.url));
+  const {stdout} = await promisify(execFile)('python3', [helper, 'env', '--json']);
+  expect(baseURL).toBe(JSON.parse(stdout).PITCH_BASE_URL);
   const target = new URL(baseURL);
   expect(['localhost', '127.0.0.1', '[::1]']).toContain(target.hostname);
   const response = await request.get(`/api/demo/state?${query}`);
@@ -56,13 +60,14 @@ test('real API: seed, privacy, progression, delayed demolition and retry protect
   state = await action(request, 'property');
   const first = own(state).houses[0];
   expect(first.xp).toBe(0);
-  expect(first.floors).toBe(2);
+  expect(first.floors).toBe(1);
   await action(request, 'motor');
   await action(request, 'motor');
   const key = `retry-${crypto.randomUUID()}`;
   state = await action(request, 'motor', key);
   expect(own(state).houses[0].xp).toBe(3);
-  expect(own(state).houses[0].floors).toBe(5);
+  expect(own(state).houses[0].floors).toBe(1);
+  expect(own(state).houses[0].tier).toBe(1);
   const version = state.version;
   state = await action(request, 'motor', key);
   expect(state.version).toBe(version);
@@ -211,11 +216,8 @@ test('a real backend restart preserves the street, pending deadline and request 
   const before = await post('terminate-property', terminationKey);
   const expected = own(before, streetId);
   expect(expected.houses.some((house) => house.status === 'pending_demolition')).toBe(true);
-  const compose = fileURLToPath(new URL('../../infra/pitch.compose.yaml', import.meta.url));
-  const env = fileURLToPath(new URL('../../infra/pitch.env.example', import.meta.url));
-  const restarted = await promisify(execFile)('docker', [
-    'compose', '-p', 'vsk-pitch', '--env-file', env, '-f', compose, 'restart', 'backend',
-  ], { timeout: 60_000 });
+  const helper = fileURLToPath(new URL('../../scripts/ci_stack.py', import.meta.url));
+  const restarted = await promisify(execFile)('python3', [helper, 'restart', 'backend'], { timeout: 60_000 });
   await expect.poll(async () => {
     try { return (await request.get('/health', { timeout: 5000 })).status(); }
     catch { return 0; }

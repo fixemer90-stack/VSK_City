@@ -1,17 +1,18 @@
-"""Destructive ONLY to the isolated synthetic vsk-pitch test world; never other projects."""
-import subprocess
+"""Destructive ONLY to an explicitly selected disposable vsk-ci-* test world."""
 import time
 import unittest
 
 from test_http import AGENT, action, call, street
+from scripts.ci_stack import run_compose
 
 
 def docker(*args):
-    return subprocess.check_output(['docker', *args], text=True).strip()
+    command, service, *rest = args
+    return run_compose([command, '-T', service, *rest] if command == 'exec' else [command, service, *rest])
 
 
 def sql(command):
-    return docker('exec', 'vsk-pitch-postgres-1', 'psql', '-U', 'vsk_pitch', '-d', 'vsk_pitch', '-Atc', command)
+    return docker('exec', 'postgres', 'psql', '-U', 'vsk_pitch', '-d', 'vsk_pitch', '-Atc', command)
 
 
 def ready():
@@ -36,7 +37,7 @@ class PersistenceTests(unittest.TestCase):
         _, before=action('terminate-property',key)
         snapshot=street(before)
         offset=sql("SELECT state->>'offsetSeconds' FROM pitch_world WHERE id=1")
-        docker('restart','vsk-pitch-backend-1')
+        docker('restart','backend')
         ready()
         code,after=call('/api/demo/state')
         self.assertEqual(code,200)
@@ -49,8 +50,8 @@ class PersistenceTests(unittest.TestCase):
 
     def test_redis_loss_health_failure_and_cache_rebuild(self):
         _,before=action('property')
-        self.assertEqual(docker('exec','vsk-pitch-redis-1','redis-cli','DEL','pitch:world:version'),'1')
-        docker('stop','vsk-pitch-redis-1')
+        self.assertEqual(docker('exec','redis','redis-cli','DEL','pitch:world:version'),'1')
+        docker('stop','redis')
         try:
             code,health=call('/health')
             self.assertEqual(code,503)
@@ -60,11 +61,11 @@ class PersistenceTests(unittest.TestCase):
             self.assertEqual(code,200)
             self.assertEqual(street(after),street(before))
         finally:
-            docker('start','vsk-pitch-redis-1')
+            docker('start','redis')
         ready()
         _,after=call('/api/demo/state')
         self.assertEqual(street(after),street(before))
-        self.assertEqual(docker('exec','vsk-pitch-redis-1','redis-cli','GET','pitch:world:version'),str(after['version']))
+        self.assertEqual(docker('exec','redis','redis-cli','GET','pitch:world:version'),str(after['version']))
 
     def test_worker_demolishes_without_get_or_action(self):
         _,pending=action('terminate-property')

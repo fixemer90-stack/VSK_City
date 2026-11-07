@@ -1,0 +1,54 @@
+# Disposable synthetic CI only. No fixed container/volume names or pitch image tags.
+name: ${CI_COMPOSE_PROJECT:?Set a unique vsk-ci run project}
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vsk_pitch
+      POSTGRES_USER: vsk_pitch
+      POSTGRES_PASSWORD: ci-synthetic-only
+    volumes: ['ci-postgres:/var/lib/postgresql/data']
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U vsk_pitch -d vsk_pitch]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  backend:
+    image: vsk-ci-backend:${CI_COMPOSE_PROJECT:?required}
+    build:
+      context: ..
+      dockerfile: src/backend/Dockerfile
+      target: runtime
+    environment:
+      DEMO_MODE: pitch
+      DEMO_SEED_PATH: /app/seed
+      POSTGRES_CONNECTION: Host=postgres;Database=vsk_pitch;Username=vsk_pitch;Password=ci-synthetic-only;Timeout=5;Command Timeout=30
+      REDIS_CONNECTION: redis:6379,abortConnect=false,connectTimeout=3000,syncTimeout=3000
+      DEMOLITION_POLL_SECONDS: '1'
+      ASPNETCORE_URLS: http://+:8080
+    ports: ['127.0.0.1:${CI_BACKEND_PORT:-5289}:8080']
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, dotnet, Vsk.Pitch.dll, --health-check]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+  frontend:
+    image: vsk-ci-frontend:${CI_COMPOSE_PROJECT:?required}
+    build:
+      context: ..
+      dockerfile: src/frontend/Dockerfile
+    ports: ['127.0.0.1:${CI_FRONTEND_PORT:-5288}:80']
+    depends_on:
+      backend: {condition: service_healthy}
+volumes:
+  ci-postgres: {}

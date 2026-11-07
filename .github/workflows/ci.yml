@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend lint, types, tests and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.22.2
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  backend:
+    name: Backend build and engine assertions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build tests/backend/Vsk.Pitch.Tests.csproj -c Release --warnaserror
+      - run: dotnet run --project tests/backend/Vsk.Pitch.Tests.csproj -c Release --no-build
+
+  python:
+    name: Python lint, format, strict types and fixtures
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - run: python -m pip install -r requirements-ci.txt
+      - run: ruff check scripts tests/test_demo_data.py tests/test_ci_stack.py
+      - run: ruff format --check scripts tests/test_demo_data.py tests/test_ci_stack.py
+      - run: mypy
+      - run: python -m unittest discover -s tests -p 'test_*.py' -v
+
+  assets:
+    name: Actual sprite export and committed artifact parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.22.2
+          cache: npm
+          cache-dependency-path: tests/pitch-browser/package-lock.json
+      - run: npm ci --prefix tests/pitch-browser --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+        working-directory: tests/pitch-browser
+      - run: node --test tests/scripts/sprite-export-contract.test.mjs tests/scripts/ci-guard.test.mjs
+      - name: Export must match the reviewed committed PNG pack
+        run: git diff --exit-code -- src/frontend/public/sprites/manifest.json src/frontend/public/sprites/catalog.html 'src/frontend/public/sprites/*.png'
+
+  integration:
+    name: Isolated HTTP, persistence and real browser
+    needs: [frontend, backend, python, assets]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CI_COMPOSE_PROJECT: vsk-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      CI_FRONTEND_PORT: '5288'
+      CI_BACKEND_PORT: '5289'
+      PITCH_TEST_OUTPUT: ../../test-results/ci-browser
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.22.2
+          cache: npm
+          cache-dependency-path: tests/pitch-browser/package-lock.json
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+      - name: Validate disposable target and publish safe test environment
+        run: python3 scripts/ci_stack.py env >> "$GITHUB_ENV"
+      - run: python3 scripts/ci_stack.py config
+      - run: npm ci --prefix tests/pitch-browser --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+        working-directory: tests/pitch-browser
+      - run: python3 scripts/ci_stack.py up
+      - run: python3 -m unittest discover -s tests/backend -p 'test_*.py' -v
+      - run: npx playwright test --reporter=line
+        working-directory: tests/pitch-browser
+      - name: Collect isolated service logs on failure
+        if: failure()
+        run: python3 scripts/ci_stack.py logs > ci-service.log
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: ci-browser-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/ci-browser/
+            ci-service.log
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Remove only this disposable CI project and its volumes
+        if: always()
+        run: python3 scripts/ci_stack.py down

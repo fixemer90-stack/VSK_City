@@ -28,20 +28,21 @@ docker run --rm --entrypoint dotnet -w /repo vsk-pitch-backend-tests:local run -
 
 ## Настоящий HTTP/runtime — 10 unittest
 
-Нужен запущенный изолированный Compose vsk-pitch:
+Нужен отдельный disposable CI project, не используемый операторский vsk-pitch.
+Настройка переменных и cleanup — в [CI runbook](../docs/CI.md).
 
 ```sh
-PITCH_URL=http://127.0.0.1:5189 python3 -m unittest discover -s tests/backend -p 'test_*.py' -v
+python3 -m unittest discover -s tests/backend -p 'test_*.py' -v
 ```
 
-Внимание: этот набор сбрасывает синтетический мир, перезапускает только pitch backend,
-временно останавливает/поднимает только pitch Redis и двигает сохранённые demo-часы
-в отдельной БД vsk_pitch для проверки фонового сноса. Не запускать во время питча
-или параллельно с browser smoke. Volumes и исходные CSV не удаляются.
+Внимание: этот набор сбрасывает синтетический мир, перезапускает backend и Redis
+только выбранного CI project и двигает его demo-часы для проверки фонового сноса.
+Без явных opt-in/project/URL он отказывается выполнять записи. Не запускать параллельно
+с browser smoke на той же временной БД. Cleanup удаляет только disposable CI volumes.
 
 ## Frontend — 26 unit/component проверок
 
-Из src/frontend: `npm ci`, `npm test`, `npm run typecheck`, `npm run build`.
+Из src/frontend: `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, `npm run build`.
 Для медленного WSL/NTFS можно использовать те же исходники внутри build-stage:
 
 ```sh

@@ -2,9 +2,9 @@
 
 Python fixture-тесты проверяют входные CSV. Этот отдельный набор Playwright проверяет
 реальный локальный frontend/API и сохранение состояния при рестарте backend.
-Нужен запущенный изолированный Compose-проект `vsk-pitch` из E01.
-
-Из этого каталога:
+Полный набор требует disposable CI-проекта по [runbook](../../docs/CI.md),
+не используемого операторского vsk-pitch. После экспорта безопасных CI/PITCH переменных
+и запуска временного стенда из этого каталога:
 
 ```sh
 npm ci
@@ -12,10 +12,10 @@ npx playwright install chromium
 npm test
 ```
 
-По умолчанию base URL: `http://127.0.0.1:5188`, переопределяется PITCH_BASE_URL.
-Не направлять тесты на рабочие/чужие окружения: они меняют синтетические продажи,
-сбрасывают общий демо-мир, двигают демо-время и перезапускают сервис backend
-только проекта `vsk-pitch`. PostgreSQL/Redis volumes не удаляются.
+Default base URL 5188 предназначен только для read-only specs ниже. Полный набор требует
+PITCH_BASE_URL временного стенда (по умолчанию5288), CI_COMPOSE_PROJECT и PITCH_ALLOW_MUTATIONS=1.
+Без них mutating pitch.spec отказывается выполнять запросы. Продажи/reset/demo-часы/restart
+меняют только выбранный disposable CI project; cleanup может удалить лишь его volumes.
 
 Проверки:
 

@@ -6,11 +6,15 @@ import urllib.error
 import urllib.request
 import uuid
 
+from scripts.ci_stack import require_mutation_target
+
 BASE = os.environ.get('PITCH_URL', 'http://127.0.0.1:5189')
 AGENT = 'TEST-AGENT-001-044'
 
 
 def call(path, body=None, role='agent', agent=AGENT):
+    if body is not None:
+        require_mutation_target(BASE)
     url = BASE + path
     if path != '/health':
         url += '?agentId=' + agent + '&role=' + role
@@ -45,7 +49,8 @@ class HttpTests(unittest.TestCase):
     def test_seed_and_exact_contract(self):
         code, state = call('/api/demo/state')
         self.assertEqual(code, 200)
-        self.assertEqual(set(state), {'mode', 'version', 'now', 'viewer', 'cities'})
+        self.assertEqual(set(state), {'mode', 'rulesVersion', 'version', 'now', 'viewer', 'cities'})
+        self.assertEqual(state['rulesVersion'], 2)
         self.assertEqual(len(state['cities']), 25)
         self.assertTrue(all(len(c['streets']) == 50 for c in state['cities']))
         self.assertEqual(sum(len(s['houses']) for c in state['cities'] for s in c['streets']), 4175)

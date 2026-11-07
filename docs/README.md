@@ -9,6 +9,7 @@
 - [ROADMAP](ROADMAP.md) — актуальные этапы A–D.
 - [MVP-STATUS](MVP-STATUS.md) — фактическая готовность.
 - [Питч: запуск и сценарий](PITCH.md) — работающий локальный демонстрационный срез E01.
+- [CI](CI.md) — конфигурация quality gates, безопасный отдельный runtime и ограничения проверки.
 - [Архитектура](architecture/SYSTEM-ARCHITECTURE.md) — проект компонентов, внутренних потоков, транзакций, чтения, доступа и поставки.
 - [ADR и архитектурная навигация](architecture/README.md) — решения и ограничения, включая предложение модульного backend.
 - [Корпоративные требования](architecture/CORPORATE-REQUIREMENTS.md) — Docker, env, stateless, PostgreSQL/Redis, условное хранение файлов в S3/MinIO.
