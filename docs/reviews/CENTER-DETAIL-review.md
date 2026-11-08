@@ -41,6 +41,17 @@ Image ID: `sha256:cabdb7885f9dd4dcc9f15ed3c070d620e9c1ff855a6b6d61413f7efa91b9e6
 
 Built offline from the cached Node dependency/build stage and nginx runtime, with the complete frozen current frontend copied over; no dependency manifests changed. The temporary preview substituted a GET/HEAD-only API proxy configuration **in its container**, not in the reusable image. Operator frontend/backend/dependencies were not deployed, recreated or restarted. The preview was removed after verification. No push performed.
 
+## Verified local rollout
+
+The parent inspected the before/after comparison, independently verified all 32 non-center
+manifest entries and source/PNG hashes, and deployed the exact candidate image by recreating
+only frontend. On operator port 5188, **7/7** read-only tests passed (`sprites`, `map-centers`,
+`depth`), including real texture SHA, all three centers, native picking and camera transforms.
+Windows host HTTP returned 200; backend health remained healthy. PostgreSQL raw state before
+and after matched: version **1964**, MD5 `e3cc61bc1260728e60bb381999548153`.
+Backend/PostgreSQL/Redis IDs and start times remained unchanged. Live screenshots are under
+`test-results/center-detail-live/`. Publication and exact-SHA CI are verified separately.
+
 ## Limits
 
 These are stylized compact illustrations, not survey-accurate landmark reconstructions. At whole-city fit the centers are intentionally small, so fine stonework becomes legible on zoom; the source footprints were not inflated to disguise that. The user house art retains its own raster/pixel texture. Unrelated user archive deletions and the parking ZIP were left untouched and excluded from the frozen build and commit.
