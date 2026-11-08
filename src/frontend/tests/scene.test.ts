@@ -106,13 +106,44 @@ for(const [name,centerId] of [['Москва','center-moscow'],['Владиво�
  const center=items.findIndex(s=>s.label===centerId);assert.ok(center>0&&center<items.length-1,'center must not overpaint foreground');
  assert.ok(items.slice(0,center).some(s=>s.label.startsWith('house-')));assert.ok(items.slice(center+1).some(s=>s.label.startsWith('house-')));
 });
+test('city has continuous landscaped ground and connected vector asphalt instead of grass panels and isolated road sprites',()=>{
+ const {internal}=depthFixture();const c=city(),before=JSON.stringify(c);internal.cityScene(c);internal.render();
+ const grass=internal.terrain.children.find((item:Container)=>item.label==='city-grass');
+ assert.ok(grass instanceof Graphics,'one continuous city meadow replaces beige gaps');
+ assert.equal(grass.context.instructions.filter((i:any)=>i.action==='fill').length,1);
+ assert.equal(sprites(internal.terrain).length,0,'no opaque per-street grass cards or road-straight strips');
+ const roads=internal.terrain.children.filter((item:Container)=>item.label==='city-road');assert.equal(roads.length,1,'paint all sidewalks before any asphalt so segment caps cannot leave pale seams across junctions');
+ const road=roads[0];assert.ok(road instanceof Graphics);const strokes=road.context.instructions.filter((i:any)=>i.action==='stroke');
+ assert.equal(strokes.length,6,'three width groups: complete sidewalk pass, then complete asphalt/path pass');
+ for(let i=0;i<3;i++)assert.deepEqual(strokes[i].data.path.instructions,strokes[i+3].data.path.instructions,'replay the entire connected graph for asphalt, not isolated endpoint caps');
+ for(const [x,y] of [[0,0],[950,850],[450,375],[730,830]])assert.ok(grass.containsPoint({x:x-y,y:(x+y)*.48}));
+ assert.equal(JSON.stringify(c),before);
+});
+
+test('permanent city pocket gardens never occupy a current or appended street thumbnail',()=>{
+ const {internal}=depthFixture();internal.cityScene(city());
+ const park=internal.terrain.children.find((item:Container)=>item.label==='city-pocket-park') as Graphics;assert.ok(park);
+ for(let i=0;i<64;i++){const p=cityBlockPosition(i);for(let dx=8;dx<=92;dx+=7)for(let dy=12;dy<=76;dy+=8)assert.equal(park.containsPoint({x:p.x+dx,y:p.y+dy}),false,`park cannot become a sales plot at street ${i}`);}
+});
+
+test('city terrain and existing miniature anchors are invariant under occupancy, appending a street and camera transforms',()=>{
+ const base=depthFixture(),filled=depthFixture(),c=city();base.internal.cityScene(c);base.internal.render();
+ const changed=structuredClone(c);changed.streets[0].houses=[];changed.streets[1].parking=[];changed.streets[2].houses.push({...street(2).houses[0],id:'added-house',lotIndex:7});changed.streets.push(street(50));
+ filled.internal.cityScene(changed);filled.internal.render();
+ const ground=(f:ReturnType<typeof depthFixture>)=>f.internal.terrain.children.filter((item:Container)=>['city-grass','city-meadow-texture','city-road'].includes(item.label)).map((g:Graphics)=>g.context.instructions.map((i:any)=>({action:i.action,style:i.data.style,path:i.data.path.instructions})));
+ assert.deepEqual(ground(filled),ground(base),'roads and continuous ground cannot depend on sales or reflow when a street is appended');
+ const identity=(f:ReturnType<typeof depthFixture>)=>JSON.parse(f.scene.surface.nativeElement.dataset['depthOrder']!).filter((i:DepthEntry)=>i.identity) as DepthEntry[];
+ for(const old of identity(base).filter(i=>!['house-0'].includes(i.identity!))){const next=identity(filled).find(i=>i.identity===old.identity)!;assert.ok(next);assert.deepEqual([next.sprite,next.x,next.y,next.streetId],[old.sprite,old.x,old.y,old.streetId]);}
+ const before=ground(base);base.internal.root.scale.set(2);base.internal.root.position.set(123,45);base.internal.render();assert.deepEqual(ground(base),before);
+});
+
 test('city flat objects retain owner clicks and polygon-only ground navigation; annotations cannot intercept',()=>{
  const {scene,internal}=depthFixture();const c=city();c.streets[0].name='Private owner name';c.streets[0].houses[0].status='pending_demolition';internal.cityScene(c);internal.render();
  assert.deepEqual(internal.root.children.map((c:Container)=>c.label),['terrain','objects','annotations']);
  assert.equal(internal.annotations.eventMode,'none');assert.equal(internal.annotations.children.length,3);
  const selected:string[]=[];scene.streetSelect.subscribe(s=>selected.push(s.id));
  for(let i=0;i<c.streets.length;i++){
-  const footprint=internal.terrain.children[i+1] as Container;assert.ok(footprint.hitArea instanceof Polygon);const p=cityBlockPosition(i);
+  const footprint=internal.terrain.children.find((item:Container)=>item.label===`city-street-${i}`) as Container;assert.ok(footprint.hitArea instanceof Polygon);const p=cityBlockPosition(i);
   assert.ok(footprint.hitArea.contains((p.x+50)-(p.y+50),(p.x+p.y+100)*.48));
   assert.equal(footprint.hitArea.contains((p.x-p.y),(p.x+p.y)*.48-20),false,'no elevated rectangle over adjacent streets');
   footprint.emit('pointertap');assert.equal(selected.pop(),c.streets[i].id);
