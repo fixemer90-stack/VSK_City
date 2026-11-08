@@ -7,6 +7,7 @@
 Графика объектов: [10 ступеней, парные дома A/B и 35 спрайтов](reviews/TEN-TIERS-review.md),
 каталог `http://localhost:5188/sprites/catalog.html`.
 Четыре пользовательские парковки: [свежая визуальная проверка](reviews/PARKING-review.md).
+Единая извилистая улица: [проверенный локальный кандидат без rollout](reviews/STREET-LAYOUT-review.md).
 
 ## Что показываем
 

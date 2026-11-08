@@ -1,5 +1,6 @@
 import {AfterViewInit,Component,ElementRef,EventEmitter,Input,OnChanges,OnDestroy,Output,ViewChild,signal} from '@angular/core';
-import {Application,Container,Graphics,Text,Polygon,Circle,Sprite} from 'pixi.js';
+import {Application,Container,Graphics,Text,Polygon,Circle,Sprite,Matrix} from 'pixi.js';
+import {streetLayout} from './street-layout';
 import {City,Street,lotPosition,cityBlockPosition} from './model';
 import {COUNTRY_RINGS,cityPoint,LABEL_CITIES} from './country-geometry';
 import {landmarkKind,landmarkName} from './city-landmarks';
@@ -110,15 +111,20 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   });
   const center=this.iso(485,505);this.pack!.place(this.objects!,`center-${landmarkKind(city)}` as SpriteId,center.x,center.y);
  }
- private streetScene(street:Street){this.layers();const g=new Graphics();this.terrain!.addChild(g);const max=Math.max(11,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex)),rows=Math.floor(max/6)+1;
- this.tile(g,-70,-85,790,rows*126+180,0xdde1d2);this.tile(g,-50,-65,750,rows*126+140,0xece9dc);
- const terrain=this.terrain!;
- for(let row=0;row<rows;row++)for(let xx=-50;xx<700;xx+=88){
-  const width=Math.min(88,700-xx);
-  this.pack!.ground(terrain,xx===302?'road-crossing':'road-straight',xx,row*126+83,width,32);
-  this.pack!.ground(terrain,'sidewalk',xx,row*126+79,width,4);
-  this.pack!.ground(terrain,'sidewalk',xx,row*126+115,width,5);
+ private streetScene(street:Street){this.layers();const g=new Graphics();this.terrain!.addChild(g);const max=Math.max(15,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex)),rows=Math.floor(max/8)+1;
+ const left=rows>2?-320:-140;
+ this.tile(g,left,-85,850-left,rows*360+10,0xdde1d2);this.tile(g,left+20,-65,810-left,rows*360-30,0xece9dc);
+ const terrain=this.terrain!,{road}=streetLayout(max),path=new Graphics();path.label='street-road';
+ // Stroke in the ground plane, then project the whole corridor: constant world width on curves.
+ for(const [color,width] of [[0xd0d1bd,50],[0x889595,34]]){
+  // Pixi consumes the active path on stroke; replay it for the inner asphalt.
+  path.moveTo(road[0].x,road[0].y);for(const p of road.slice(1))path.lineTo(p.x,p.y);
+  path.stroke({color,width,cap:'round',join:'round'});
  }
+ path.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));terrain.addChild(path);
+ const markings=new Graphics();markings.label='street-centerline';
+ for(let i=0;i<road.length-1;i+=3)markings.moveTo(road[i].x,road[i].y).lineTo(road[i+1].x,road[i+1].y);
+ markings.stroke({color:0xf3edd5,width:1.5,cap:'round'});markings.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));terrain.addChild(markings);
  const occupied=new Set([...street.houses,...street.parking].map(h=>h.lotIndex));
  for(let i=0;i<=max;i++){
   const p=lotPosition(i);this.pack!.ground(terrain,occupied.has(i)?'grass':'vacant-lot',p.x-5,p.y-5,88,80);

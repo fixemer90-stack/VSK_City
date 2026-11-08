@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {SceneComponent} from '../app/scene.ts';
 import {Container,Graphics,Sprite,Texture,Polygon} from 'pixi.js';
 import {SpritePack,SPRITE_IDS} from '../app/sprite-pack';
-import {City,Street,cityBlockPosition} from '../app/model';
+import {City,Street,cityBlockPosition,lotPosition} from '../app/model';
 
 function fixture(){
  const scene=new SceneComponent();const internal=scene as any;
@@ -114,6 +114,23 @@ test('street terrain stays below a single globally sorted layer including its la
  assert.ok(sprites(internal.terrain).every(s=>['grass','vacant-lot','road-crossing','road-straight','sidewalk'].includes(s.label)));
  const metadata=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];assert.ok(metadata.every(m=>m.streetId===s.id));
 });
+test('street renders a single isometric asphalt path, with occupied and vacant plots on its flanks',()=>{
+ const {scene,internal}=depthFixture();const s=street(0),before=JSON.stringify(s);internal.streetScene(s);internal.render();
+ const road=internal.terrain.children.find((c:Container)=>c.label==='street-road');
+ assert.ok(road instanceof Graphics,'connected vector road, not independently tiled row roads');
+ const strokes=road.context.instructions.filter((i:any)=>i.action==='stroke');
+ assert.equal(strokes.length,2,'one continuous sidewalk and asphalt stroke');
+ assert.ok(strokes[0].data.path.instructions.length>100);
+ assert.deepEqual(strokes[1].data.path.instructions,strokes[0].data.path.instructions,'asphalt must cover the entire sidewalk path, not only its endpoint');
+ const matrix=road.getGlobalTransform();const near=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-9);near(matrix.a,1);near(matrix.b,.48);near(matrix.c,-1);near(matrix.d,.48);
+ const ground=sprites(internal.terrain);assert.equal(ground.filter(s=>s.label==='grass').length,2);assert.equal(ground.filter(s=>s.label==='vacant-lot').length,14);
+ assert.ok(!ground.some(s=>s.label.startsWith('road-')),'old disconnected road tiles are gone');
+ assert.equal(JSON.stringify(s),before,'layout cannot rewrite persisted lots, identities, XP or occupancy');
+ const items=internal.objects.children as Sprite[];ordered(items);
+ const p=lotPosition(0),house=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!).find((m:DepthEntry)=>m.identity===s.houses[0].id);
+ assert.equal(house.x,p.x+34-(p.y+32));assert.equal(house.y,(p.x+34+p.y+32)*.48);
+});
+
 test('ground depth drives Pixi render ordering independently of height/scale, with stable ties and post-transform metadata',()=>{
  const {scene,internal}=depthFixture();internal.layers();const g=new Graphics();internal.terrain.addChild(g);
  internal.building(g,100,100,10,'tall',false);internal.building(g,100,100,1,'short',false);internal.building(g,300,300,1,'foreground',false,.49);
@@ -144,5 +161,5 @@ test('flattening preserves existing world anchors and A/B identities in city and
   assert.equal(h.streetId,c.streets[i].id);
  }
  streetView.internal.streetScene(c.streets[0]);streetView.internal.render();const streetData=JSON.parse(streetView.scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
- const h=streetData.find(m=>m.identity==='house-0')!;assert.equal(h.x,12+22-(10+22));assert.equal(h.y,(12+22+10+22)*.48);assert.equal(h.sprite,cityData.find(m=>m.identity==='house-0')!.sprite);
+ const p=lotPosition(0),h=streetData.find(m=>m.identity==='house-0')!;assert.equal(h.x,p.x+12+22-(p.y+10+22));assert.equal(h.y,(p.x+12+22+p.y+10+22)*.48);assert.equal(h.sprite,cityData.find(m=>m.identity==='house-0')!.sprite);
 });
