@@ -18,6 +18,7 @@ for(const scenario of ['empty','motor_only','mixed','skyscraper','overflow','lar
   await expect.poll(()=>surface.evaluate(el=>Object.keys(JSON.parse(el.dataset.houseSprites||'{}')).sort())).toEqual(street.houses.map(h=>h.id).sort());
   const read=()=>surface.evaluate(el=>({items:JSON.parse(el.dataset.depthOrder||'[]'),sprites:JSON.parse(el.dataset.spriteInstances||'{}')}));
   const baseline=await read();
+  expect(Object.keys(baseline.sprites).some(id=>id.startsWith('center-'))).toBe(false);
   expect(Object.keys(baseline.sprites).some(id=>id.startsWith('road-'))).toBe(false);
   expect(baseline.sprites['grass']||0).toBe(0);
   expect(baseline.sprites['vacant-lot']||0).toBe(0); // continuous meadow, no opaque lot panels

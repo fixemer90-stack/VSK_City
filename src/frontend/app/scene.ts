@@ -60,7 +60,6 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   if(pending){sprite.tint=0xc7b394;const badge=this.iso(x,y+37*scale+8),flag=new Graphics();flag.roundRect(badge.x-23,badge.y-8,72,18,4).fill(0xe5bf71);const label=new Text({text:'Под снос',style:{fontFamily:'Manrope Variable, sans-serif',fontSize:10,fontWeight:'600',fill:0x59451f}});label.position.set(badge.x-18,badge.y-6);(this.annotations??g.parent??this.root).addChild(flag,label);}
  }
  private parking(g:Graphics,x:number,y:number,spaces:number){const id=parkingSpriteId(spaces);if(id){const p=this.iso(x+32.5,y+32.5);this.pack!.place(this.objects??g.parent??this.root,id,p.x,p.y);}}
- private landmark(g:Graphics,x:number,y:number){const p=this.iso(x+45,y+45);this.pack!.place(this.objects??g.parent??this.root,'center-generic',p.x,p.y,.6);}
  private draw(){if(!this.app)return;this.ready.set(false);const key=this.kind+this.city?.id+this.street?.id;const changed=key!==this.key;this.key=key;this.houseSprites={};this.root.removeChildren().forEach(c=>c.destroy({children:true}));this.terrain=undefined;this.objects=undefined;this.annotations=undefined;this.objectInfo=new WeakMap();if(this.kind==='country')this.country();else if(this.kind==='city'&&this.city)this.cityScene(this.city);else if(this.street)this.streetScene(this.street);if(changed)this.fit();else this.render();this.ready.set(true);}
  private country(){
   this.countryMarkers=[];
@@ -146,7 +145,7 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   }
   this.tree(g,p.x+81,p.y+73);this.shrub(g,p.x+66,p.y+70);
  }
- this.landmark(g,690,30);for(const h of street.houses){const p=lotPosition(h.lotIndex);this.building(g,p.x+12,p.y+10,h.tier,h.id,h.status==='pending_demolition');}for(const park of street.parking){const p=lotPosition(park.lotIndex);this.parking(g,p.x+5,p.y+3,park.spaces);}
+ for(const h of street.houses){const p=lotPosition(h.lotIndex);this.building(g,p.x+12,p.y+10,h.tier,h.id,h.status==='pending_demolition');}for(const park of street.parking){const p=lotPosition(park.lotIndex);this.parking(g,p.x+5,p.y+3,park.spaces);}
  for(const object of this.objects!.children)this.objectInfo.set(object,{...this.objectInfo.get(object),streetId:street.id});
  }
 }

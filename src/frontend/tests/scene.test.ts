@@ -105,11 +105,11 @@ test('city flat objects retain owner clicks and polygon-only ground navigation; 
  internal.moved=true;internal.objects.children[0].emit('pointertap');assert.deepEqual(selected,[]);
  assert.ok(!JSON.stringify(metadata).includes('Private owner name'));
 });
-test('street terrain stays below a single globally sorted layer including its landmark, houses, parking and trees',()=>{
+test('street terrain stays below a single globally sorted layer of houses, parking and trees without a city center',()=>{
  const {scene,internal}=depthFixture();const s=street(0);s.houses.push({...s.houses[0],id:'front-house',lotIndex:23,status:'pending_demolition'});s.parking.push({id:'front-parking',spaces:2,lotIndex:22});internal.streetScene(s);internal.render();
  assert.deepEqual(internal.root.children.map((c:Container)=>c.label),['terrain','objects','annotations']);
  const items=internal.objects.children as Sprite[];assert.ok(items.every(s=>s instanceof Sprite));ordered(items);
- const center=items.findIndex(s=>s.label==='center-generic');assert.ok(center>0&&center<items.length-1);
+ assert.ok(!items.some(s=>s.label.startsWith('center-')),'city center belongs only to city overview, never to a personal street');
  assert.equal(internal.annotations.children.length,2);assert.equal(internal.annotations.eventMode,'none');
  assert.ok(sprites(internal.terrain).every(s=>['grass','vacant-lot','road-crossing','road-straight','sidewalk'].includes(s.label)));
  const metadata=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];assert.ok(metadata.every(m=>m.streetId===s.id));
