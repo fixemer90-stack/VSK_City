@@ -534,7 +534,7 @@
       "title": "Кремлёвская площадь",
       "group": "centers",
       "sourceFile": "center-moscow.svg",
-      "file": "center-moscow.png?v=f455c2c00da2",
+      "file": "center-moscow.png?v=6ab592ad36fc",
       "width": 1212,
       "height": 740,
       "anchorX": 0.5,
@@ -545,40 +545,40 @@
         "width": 1212,
         "height": 740
       },
-      "paintedPixels": 369446,
+      "paintedPixels": 372146,
       "worldScale": 0.31,
       "pixelRatio": 2,
-      "sha256": "f455c2c00da2df99b0e688a051c80ca8456ac55a7a58c350e96018d723f312f3",
-      "sourceSha256": "f8de208934da9846fc3c93f0272b86b1b3f35806bec093c7dd5e4489a11168e7"
+      "sha256": "6ab592ad36fcf2e06cd1885c4478fc71e190d6d504521cd4fe910db16478bf9a",
+      "sourceSha256": "ddd5951fd1fc14fed9295b41b10c77fcf671fcca22164a2eb72e85cee7803815"
     },
     {
       "id": "center-vladivostok",
       "title": "Золотой мост",
       "group": "centers",
       "sourceFile": "center-vladivostok.svg",
-      "file": "center-vladivostok.png?v=c910fb156b61",
+      "file": "center-vladivostok.png?v=5759bda9bfc7",
       "width": 1212,
-      "height": 702,
+      "height": 701,
       "anchorX": 0.5,
-      "anchorY": 0.5811965811965812,
+      "anchorY": 0.5805991440798859,
       "sourceCrop": {
         "left": 34,
-        "top": 292,
+        "top": 293,
         "width": 1212,
-        "height": 702
+        "height": 701
       },
-      "paintedPixels": 374793,
+      "paintedPixels": 370094,
       "worldScale": 0.31,
       "pixelRatio": 2,
-      "sha256": "c910fb156b6137972dd1e286257388d3b6e4f05ea3f4f13a2c8b7eb644dc48fa",
-      "sourceSha256": "ee2e414c5324574c528c4a65eaa0aa366fa43b0b6414997bed511ee8372e2a98"
+      "sha256": "5759bda9bfc76fc755187f94ebcd316f5c09f24c559c508486c73e46829a49bf",
+      "sourceSha256": "a7c2c4d7037208477c9ed1e39217036bc99c1975107a1a0e0fe31ca1e500c46b"
     },
     {
       "id": "center-generic",
       "title": "Городская площадь",
       "group": "centers",
       "sourceFile": "center-generic.svg",
-      "file": "center-generic.png?v=9af3d864ae20",
+      "file": "center-generic.png?v=eb1796838357",
       "width": 1212,
       "height": 637,
       "anchorX": 0.5,
@@ -589,11 +589,11 @@
         "width": 1212,
         "height": 637
       },
-      "paintedPixels": 384222,
+      "paintedPixels": 388917,
       "worldScale": 0.31,
       "pixelRatio": 2,
-      "sha256": "9af3d864ae200a596ecc5e3acc66d34764ee7c8357404f349e061a3cc2a5e777",
-      "sourceSha256": "a7c25aa13d35229b56879f1678ca1f58b3f7bd91bc77f182ed1df30e82799376"
+      "sha256": "eb1796838357a91758adf536f72e3699b54b899fbd2b32f588a9562e33d5c19d",
+      "sourceSha256": "3bc603a7cb2bbc63cad6c56f16cdd04fd73214a75c932b4434a22e5beb0e43b0"
     },
     {
       "id": "tree-broadleaf",

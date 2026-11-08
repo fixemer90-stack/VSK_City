@@ -1,0 +1,210 @@
+{
+  "baseline": "16d27cbac1c920bd510e87adb191a9995124e6e1",
+  "imageTag": "vsk-ci-center-detail-frontend:1108",
+  "rawPostgresSha256": "9383d32d327a279dec1a351ed1e5d79c1e841c2715a6911af1eb40a6681bdb99",
+  "operatorContainersUnchanged": true,
+  "worldUnchanged": true,
+  "version": 1964,
+  "servedPngChecks": 35,
+  "image": "sha256:cabdb7885f9dd4dcc9f15ed3c070d620e9c1ff855a6b6d61413f7efa91b9e617",
+  "tests": {
+    "frontend": 44,
+    "assetAndSafety": 7,
+    "readOnlyBrowser": 16
+  },
+  "nonTargetUnchanged": [
+    "house-01-a",
+    "house-01-b",
+    "house-02-a",
+    "house-02-b",
+    "house-03-a",
+    "house-03-b",
+    "house-04-a",
+    "house-04-b",
+    "house-05-a",
+    "house-05-b",
+    "house-06-a",
+    "house-06-b",
+    "house-07-a",
+    "house-07-b",
+    "house-08-a",
+    "house-08-b",
+    "house-09-a",
+    "house-09-b",
+    "house-10-a",
+    "house-10-b",
+    "parking-01",
+    "parking-02",
+    "parking-03",
+    "parking-04",
+    "tree-broadleaf",
+    "tree-conifer",
+    "shrub",
+    "grass",
+    "vacant-lot",
+    "road-straight",
+    "road-crossing",
+    "sidewalk"
+  ],
+  "centers": [
+    {
+      "id": "center-moscow",
+      "title": "\u041a\u0440\u0435\u043c\u043b\u0451\u0432\u0441\u043a\u0430\u044f \u043f\u043b\u043e\u0449\u0430\u0434\u044c",
+      "group": "centers",
+      "sourceFile": "center-moscow.svg",
+      "file": "center-moscow.png?v=6ab592ad36fc",
+      "width": 1212,
+      "height": 740,
+      "anchorX": 0.5,
+      "anchorY": 0.6027027027027027,
+      "sourceCrop": {
+        "left": 34,
+        "top": 254,
+        "width": 1212,
+        "height": 740
+      },
+      "paintedPixels": 372146,
+      "worldScale": 0.31,
+      "pixelRatio": 2,
+      "sha256": "6ab592ad36fcf2e06cd1885c4478fc71e190d6d504521cd4fe910db16478bf9a",
+      "sourceSha256": "ddd5951fd1fc14fed9295b41b10c77fcf671fcca22164a2eb72e85cee7803815"
+    },
+    {
+      "id": "center-vladivostok",
+      "title": "\u0417\u043e\u043b\u043e\u0442\u043e\u0439 \u043c\u043e\u0441\u0442",
+      "group": "centers",
+      "sourceFile": "center-vladivostok.svg",
+      "file": "center-vladivostok.png?v=5759bda9bfc7",
+      "width": 1212,
+      "height": 701,
+      "anchorX": 0.5,
+      "anchorY": 0.5805991440798859,
+      "sourceCrop": {
+        "left": 34,
+        "top": 293,
+        "width": 1212,
+        "height": 701
+      },
+      "paintedPixels": 370094,
+      "worldScale": 0.31,
+      "pixelRatio": 2,
+      "sha256": "5759bda9bfc76fc755187f94ebcd316f5c09f24c559c508486c73e46829a49bf",
+      "sourceSha256": "a7c2c4d7037208477c9ed1e39217036bc99c1975107a1a0e0fe31ca1e500c46b"
+    },
+    {
+      "id": "center-generic",
+      "title": "\u0413\u043e\u0440\u043e\u0434\u0441\u043a\u0430\u044f \u043f\u043b\u043e\u0449\u0430\u0434\u044c",
+      "group": "centers",
+      "sourceFile": "center-generic.svg",
+      "file": "center-generic.png?v=eb1796838357",
+      "width": 1212,
+      "height": 637,
+      "anchorX": 0.5,
+      "anchorY": 0.5384615384615384,
+      "sourceCrop": {
+        "left": 34,
+        "top": 357,
+        "width": 1212,
+        "height": 637
+      },
+      "paintedPixels": 388917,
+      "worldScale": 0.31,
+      "pixelRatio": 2,
+      "sha256": "eb1796838357a91758adf536f72e3699b54b899fbd2b32f588a9562e33d5c19d",
+      "sourceSha256": "3bc603a7cb2bbc63cad6c56f16cdd04fd73214a75c932b4434a22e5beb0e43b0"
+    }
+  ],
+  "nativeGeometry": [
+    {
+      "phase": "before",
+      "kind": "moscow",
+      "bounds": {
+        "x": 315.5287983002024,
+        "y": 172.68257752603617,
+        "width": 498.9424549803109,
+        "height": 304.6348322487047
+      },
+      "ground": [
+        -20,
+        475.2
+      ],
+      "depth": 475.2
+    },
+    {
+      "phase": "before",
+      "kind": "vladivostok",
+      "bounds": {
+        "x": 315.5287983002024,
+        "y": 180.50430203968372,
+        "width": 498.9424549803109,
+        "height": 288.99142194404146
+      },
+      "ground": [
+        -20,
+        475.2
+      ],
+      "depth": 475.2
+    },
+    {
+      "phase": "before",
+      "kind": "generic",
+      "bounds": {
+        "x": 315.5287983002024,
+        "y": 193.883525091143,
+        "width": 498.9424549803109,
+        "height": 262.23295694922274
+      },
+      "ground": [
+        -20,
+        475.2
+      ],
+      "depth": 475.2
+    },
+    {
+      "phase": "after",
+      "kind": "moscow",
+      "bounds": {
+        "x": 315.5287983002024,
+        "y": 172.68257752603617,
+        "width": 498.9424549803109,
+        "height": 304.6348322487047
+      },
+      "ground": [
+        -20,
+        475.2
+      ],
+      "depth": 475.2
+    },
+    {
+      "phase": "after",
+      "kind": "vladivostok",
+      "bounds": {
+        "x": 315.5287983002024,
+        "y": 180.7101296674586,
+        "width": 498.9424549803109,
+        "height": 288.57975325181343
+      },
+      "ground": [
+        -20,
+        475.2
+      ],
+      "depth": 475.2
+    },
+    {
+      "phase": "after",
+      "kind": "generic",
+      "bounds": {
+        "x": 315.5287983002024,
+        "y": 193.883525091143,
+        "width": 498.9424549803109,
+        "height": 262.23295694922274
+      },
+      "ground": [
+        -20,
+        475.2
+      ],
+      "depth": 475.2
+    }
+  ],
+  "secondChromiumExportByteIdentical": true
+}

@@ -1,4 +1,5 @@
 import test from 'node:test';
+import './center-art-contract.test.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
