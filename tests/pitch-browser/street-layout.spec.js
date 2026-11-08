@@ -19,9 +19,8 @@ for(const scenario of ['empty','motor_only','mixed','skyscraper','overflow','lar
   const read=()=>surface.evaluate(el=>({items:JSON.parse(el.dataset.depthOrder||'[]'),sprites:JSON.parse(el.dataset.spriteInstances||'{}')}));
   const baseline=await read();
   expect(Object.keys(baseline.sprites).some(id=>id.startsWith('road-'))).toBe(false);
-  expect(baseline.sprites['grass']||0).toBe(street.houses.length+street.parking.length);
-  const lastLot=Math.max(15,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex));
-  expect(baseline.sprites['vacant-lot']||0).toBe(lastLot+1-street.houses.length-street.parking.length);
+  expect(baseline.sprites['grass']||0).toBe(0);
+  expect(baseline.sprites['vacant-lot']||0).toBe(0); // continuous meadow, no opaque lot panels
   for(const house of street.houses){
    const item=baseline.items.find(i=>i.identity===house.id),p=lotPosition(house.lotIndex);
    expect(item).toBeTruthy();expect(item.x).toBeCloseTo(p.x+34-(p.y+32),8);expect(item.y).toBeCloseTo((p.x+34+p.y+32)*.48,8);

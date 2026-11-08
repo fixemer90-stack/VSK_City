@@ -113,7 +113,15 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  }
  private streetScene(street:Street){this.layers();const g=new Graphics();this.terrain!.addChild(g);const max=Math.max(15,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex)),rows=Math.floor(max/8)+1;
  const left=rows>2?-320:-140;
- this.tile(g,left,-85,850-left,rows*360+10,0xdde1d2);this.tile(g,left+20,-65,810-left,rows*360-30,0xece9dc);
+ g.label='street-grass';this.tile(g,left,-85,850-left,rows*360+10,0xa8b68d);
+ const texture=new Graphics();texture.label='street-grass-texture';
+ // World-coordinate jitter keeps the meadow stable across occupancy, expansion and zoom.
+ for(let y=-64;y<rows*360-90;y+=24)for(let x=-288;x<832;x+=24){
+  const seed=((Math.imul(x,73856093)^Math.imul(y,19349663))>>>0);
+  const xx=x+seed%17,yy=y+(seed>>>8)%17;if(xx<left+8)continue;
+  const p=this.iso(xx,yy);texture.moveTo(p.x-1.5,p.y).lineTo(p.x,p.y-1.4).lineTo(p.x+2,p.y-.2);
+ }
+ texture.stroke({color:0x647d51,alpha:.16,width:.65});this.terrain!.addChild(texture);
  const terrain=this.terrain!,{road}=streetLayout(max),path=new Graphics();path.label='street-road';
  // Stroke in the ground plane, then project the whole corridor: constant world width on curves.
  for(const [color,width] of [[0xd0d1bd,50],[0x889595,34]]){
@@ -127,8 +135,15 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  markings.stroke({color:0xf3edd5,width:1.5,cap:'round'});markings.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));terrain.addChild(markings);
  const occupied=new Set([...street.houses,...street.parking].map(h=>h.lotIndex));
  for(let i=0;i<=max;i++){
-  const p=lotPosition(i);this.pack!.ground(terrain,occupied.has(i)?'grass':'vacant-lot',p.x-5,p.y-5,88,80);
-  if(!occupied.has(i))this.tree(g,p.x+55,p.y+24);
+  const p=lotPosition(i);
+  if(!occupied.has(i)){
+   // Corner marks retain vacant-plot meaning without opaque square grass panels.
+   const marks=new Graphics();marks.label='street-vacant-plot';
+   for(const [x,y,dx,dy] of [[p.x+4,p.y+4,1,1],[p.x+74,p.y+4,-1,1],[p.x+74,p.y+66,-1,-1],[p.x+4,p.y+66,1,-1]]){
+    const a=this.iso(x+dx*9,y),b=this.iso(x,y),c=this.iso(x,y+dy*9);marks.moveTo(a.x,a.y).lineTo(b.x,b.y).lineTo(c.x,c.y);
+   }
+   marks.stroke({color:0xf1edd7,alpha:.36,width:.8});terrain.addChild(marks);this.tree(g,p.x+55,p.y+24);
+  }
   this.tree(g,p.x+81,p.y+73);this.shrub(g,p.x+66,p.y+70);
  }
  this.landmark(g,690,30);for(const h of street.houses){const p=lotPosition(h.lotIndex);this.building(g,p.x+12,p.y+10,h.tier,h.id,h.status==='pending_demolition');}for(const park of street.parking){const p=lotPosition(park.lotIndex);this.parking(g,p.x+5,p.y+3,park.spaces);}

@@ -123,12 +123,36 @@ test('street renders a single isometric asphalt path, with occupied and vacant p
  assert.ok(strokes[0].data.path.instructions.length>100);
  assert.deepEqual(strokes[1].data.path.instructions,strokes[0].data.path.instructions,'asphalt must cover the entire sidewalk path, not only its endpoint');
  const matrix=road.getGlobalTransform();const near=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-9);near(matrix.a,1);near(matrix.b,.48);near(matrix.c,-1);near(matrix.d,.48);
- const ground=sprites(internal.terrain);assert.equal(ground.filter(s=>s.label==='grass').length,2);assert.equal(ground.filter(s=>s.label==='vacant-lot').length,14);
+ const ground=sprites(internal.terrain);assert.equal(ground.length,0,'continuous grass replaces panel sprites');
+ assert.equal(internal.terrain.children.filter((c:Container)=>c.label==='street-vacant-plot').length,14);
  assert.ok(!ground.some(s=>s.label.startsWith('road-')),'old disconnected road tiles are gone');
  assert.equal(JSON.stringify(s),before,'layout cannot rewrite persisted lots, identities, XP or occupancy');
  const items=internal.objects.children as Sprite[];ordered(items);
  const p=lotPosition(0),house=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!).find((m:DepthEntry)=>m.identity===s.houses[0].id);
  assert.equal(house.x,p.x+34-(p.y+32));assert.equal(house.y,(p.x+34+p.y+32)*.48);
+});
+
+test('street grass continuously covers gaps below road and lots without occupancy-dependent panels',()=>{
+ const build=(s:Street)=>{const f=depthFixture();f.internal.streetScene(s);return f.internal;};
+ const empty={...street(0),houses:[],parking:[]},view=build(empty);
+ const grass=view.terrain.children[0] as Graphics;
+ assert.equal(grass.label,'street-grass','one continuous grass plane must replace beige terrain');
+ const fills=grass.context.instructions.filter((i:any)=>i.action==='fill');
+ assert.equal(fills.length,1,'base must not be assembled from independent tiles');
+ assert.equal(fills[0].data.style.color,0xa8b68d);
+ for(const [x,y] of [[-139,-84],[849,-84],[849,644],[-139,644],[440,300],[690,350]])assert.ok(grass.containsPoint({x:x-y,y:(x+y)*.48}),'base covers outer corners and empty road/plot gaps');
+ const texture=view.terrain.children.find((c:Container)=>c.label==='street-grass-texture') as Graphics;
+ assert.ok(texture instanceof Graphics);assert.ok(texture.context.instructions.length>0);
+ assert.ok(view.terrain.children.indexOf(texture)<view.terrain.children.findIndex((c:Container)=>c.label==='street-road'));
+ assert.equal(sprites(view.terrain).length,0,'lot grass sprites would reintroduce square panels');
+ const occupied=build(street(0));
+ const geometry=(g:Graphics)=>g.context.instructions.map((i:any)=>({action:i.action,style:i.data.style,path:i.data.path.instructions}));
+ assert.deepEqual(geometry(occupied.terrain.children[0]),geometry(grass));
+ assert.deepEqual(geometry(occupied.terrain.children[1]),geometry(texture),'grass texture must not change when a plot is occupied');
+ const before=structuredClone(geometry(texture)[0].path);view.root.scale.set(2);view.root.position.set(45,80);view.render();assert.deepEqual(geometry(texture)[0].path,before);
+ const large=build({...empty,houses:[{...street(0).houses[0],lotIndex:63}]});
+ const largeGrass=large.terrain.children[0] as Graphics;
+ for(const [x,y] of [[-319,-84],[849,2804],[0,2000]])assert.ok(largeGrass.containsPoint({x:x-y,y:(x+y)*.48}));
 });
 
 test('ground depth drives Pixi render ordering independently of height/scale, with stable ties and post-transform metadata',()=>{
