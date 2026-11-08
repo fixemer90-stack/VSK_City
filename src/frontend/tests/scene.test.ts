@@ -74,6 +74,23 @@ test('actual house sprites keep identity across full and thumbnail scale and exp
  internal.root.destroy({children:true});
 });
 
+test('permanent vector furniture renders on empty streets at its own ground depth; approaches and parks are terrain',()=>{
+ const {scene,internal}=depthFixture();const s={...street(0),houses:[],parking:[]};internal.streetScene(s);internal.render();
+ for(const kind of ['lamp','bench','bin','flowerbed']){
+  const props=internal.objects.children.filter((c:Container)=>c.label===`decor-${kind}`);assert.ok(props.length>0,kind);
+  for(const p of props){assert.ok(p instanceof Graphics);assert.ok(p.context.instructions.length>=3);assert.equal(p.zIndex,p.y);assert.equal(internal.objectInfo.get(p).streetId,s.id);}
+ }
+ assert.ok(!internal.terrain.children.some((c:Container)=>c.label==='street-approach'));
+ const large=depthFixture();const occupied={...street(0),houses:[{...street(0).houses[0],lotIndex:32}]};large.internal.streetScene(occupied);large.internal.render();
+ assert.ok(large.internal.terrain.children.some((c:Container)=>c.label==='street-park'));
+ assert.equal(large.internal.terrain.children.filter((c:Container)=>c.label==='street-approach').length,1);
+ ordered(large.internal.objects.children);
+ const base=JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
+ const filled=depthFixture();filled.internal.streetScene(street(0));filled.internal.render();
+ const decor=(data:DepthEntry[])=>data.filter(m=>m.sprite.startsWith('decor-')).map(m=>[m.sprite,m.x,m.y]);
+ assert.deepEqual(decor(JSON.parse(filled.scene.surface.nativeElement.dataset['depthOrder']!)),decor(base),'occupancy does not unlock or relocate furniture');
+});
+
 function depthFixture(){
  const f=fixture();(f.scene.surface.nativeElement as any).dataset={};const entries=SPRITE_IDS.map(id=>({id,file:`${id}.png?v=${'0'.repeat(12)}`,width:1,height:1,anchorX:.5,anchorY:.8,worldScale:.22,pixelRatio:2,sha256:'0'.repeat(64)}));
  f.internal.pack=new SpritePack({version:1,entries},new Map(SPRITE_IDS.map(id=>[id,Texture.WHITE])));return f;
@@ -82,7 +99,7 @@ function street(index:number):Street{return {id:`street-${index}`,agentId:`agent
 function city():City{return {id:'city',name:'Москва',mapX:0,mapY:0,streets:Array.from({length:50},(_,i)=>street(i))};}
 function sprites(container:Container):Sprite[]{return container.children.flatMap(c=>c instanceof Sprite?[c]:sprites(c));}
 type DepthEntry={sprite:string;identity?:string;streetId?:string;depth:number;x:number;y:number;screenX:number;screenY:number;drawIndex:number};
-function ordered(items:Sprite[]){assert.ok(items.every((s,i)=>i===0||items[i-1].y<=s.y),'every individual object must paint in projected ground-anchor order');}
+function ordered(items:Container[]){assert.ok(items.every((s,i)=>i===0||items[i-1].y<=s.y),'every individual object must paint in projected ground-anchor order');}
 for(const [name,centerId] of [['Москва','center-moscow'],['Владивосток','center-vladivostok'],['Тула','center-generic']])test(`city ${name} globally orders individual objects on both sides of the center, not street clusters`,()=>{
  const {scene,internal}=depthFixture();scene.kind='city';scene.city=city();scene.city.name=name;internal.cityScene(scene.city);internal.render();
  const items=sprites(internal.root).filter(s=>!['grass','road-straight'].includes(s.label));ordered(items);
@@ -108,7 +125,7 @@ test('city flat objects retain owner clicks and polygon-only ground navigation; 
 test('street terrain stays below a single globally sorted layer of houses, parking and trees without a city center',()=>{
  const {scene,internal}=depthFixture();const s=street(0);s.houses.push({...s.houses[0],id:'front-house',lotIndex:23,status:'pending_demolition'});s.parking.push({id:'front-parking',spaces:2,lotIndex:22});internal.streetScene(s);internal.render();
  assert.deepEqual(internal.root.children.map((c:Container)=>c.label),['terrain','objects','annotations']);
- const items=internal.objects.children as Sprite[];assert.ok(items.every(s=>s instanceof Sprite));ordered(items);
+ const items=internal.objects.children as Container[];assert.ok(items.every(s=>s instanceof Sprite||s.label.startsWith('decor-')));ordered(items);
  assert.ok(!items.some(s=>s.label.startsWith('center-')),'city center belongs only to city overview, never to a personal street');
  assert.equal(internal.annotations.children.length,2);assert.equal(internal.annotations.eventMode,'none');
  assert.ok(sprites(internal.terrain).every(s=>['grass','vacant-lot','road-crossing','road-straight','sidewalk'].includes(s.label)));

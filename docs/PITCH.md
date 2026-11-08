@@ -8,6 +8,7 @@
 каталог `http://localhost:5188/sprites/catalog.html`.
 Четыре пользовательские парковки: [свежая визуальная проверка](reviews/PARKING-review.md).
 Единая извилистая улица: [проверенный локальный кандидат без rollout](reviews/STREET-LAYOUT-review.md).
+Постоянное благоустройство: [фонари, скамейки, урны, цветочницы, дорожки и зелёные карманы — кандидат без rollout](reviews/STREETSCAPE-review.md).
 
 ## Что показываем
 

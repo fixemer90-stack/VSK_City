@@ -18,6 +18,9 @@ for(const scenario of ['empty','motor_only','mixed','skyscraper','overflow','lar
   await expect.poll(()=>surface.evaluate(el=>Object.keys(JSON.parse(el.dataset.houseSprites||'{}')).sort())).toEqual(street.houses.map(h=>h.id).sort());
   const read=()=>surface.evaluate(el=>({items:JSON.parse(el.dataset.depthOrder||'[]'),sprites:JSON.parse(el.dataset.spriteInstances||'{}')}));
   const baseline=await read();
+  for(const kind of ['lamp','bench','bin','flowerbed'])expect(baseline.items.some(i=>i.sprite===`decor-${kind}`&&i.streetId===street.id)).toBe(true);
+  // A base row's public furniture is identical even on an empty street.
+  expect(baseline.items.filter(i=>i.sprite==='decor-lamp').length).toBeGreaterThanOrEqual(12);
   expect(Object.keys(baseline.sprites).some(id=>id.startsWith('center-'))).toBe(false);
   expect(Object.keys(baseline.sprites).some(id=>id.startsWith('road-'))).toBe(false);
   expect(baseline.sprites['grass']||0).toBe(0);
@@ -39,6 +42,7 @@ for(const scenario of ['empty','motor_only','mixed','skyscraper','overflow','lar
   for(let step=0;step<(scenario==='large'?4:1);step++)await page.getByRole('button',{name:'Приблизить',exact:true}).click();await check();
   await page.screenshot({path:info.outputPath(`${scenario}-zoom.png`),fullPage:true});
   await surface.focus();await page.keyboard.press('ArrowLeft');await check();
+  await page.screenshot({path:info.outputPath(`${scenario}-pan.png`),fullPage:true});
   await page.getByRole('button',{name:'Показать всю сцену',exact:true}).click();await check();
   expect(writes).toEqual([]);expect(errors).toEqual([]);
  });

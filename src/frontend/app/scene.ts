@@ -1,6 +1,8 @@
 import {AfterViewInit,Component,ElementRef,EventEmitter,Input,OnChanges,OnDestroy,Output,ViewChild,signal} from '@angular/core';
 import {Application,Container,Graphics,Text,Polygon,Circle,Sprite,Matrix} from 'pixi.js';
 import {streetLayout} from './street-layout';
+import {streetScape} from './streetscape';
+import {streetFurniture} from './street-furniture';
 import {City,Street,lotPosition,cityBlockPosition} from './model';
 import {COUNTRY_RINGS,cityPoint,LABEL_CITIES} from './country-geometry';
 import {landmarkKind,landmarkName} from './city-landmarks';
@@ -132,6 +134,26 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
  const markings=new Graphics();markings.label='street-centerline';
  for(let i=0;i<road.length-1;i+=3)markings.moveTo(road[i].x,road[i].y).lineTo(road[i+1].x,road[i+1].y);
  markings.stroke({color:0xf3edd5,width:1.5,cap:'round'});markings.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));terrain.addChild(markings);
+ const scape=streetScape(max);
+ // Pocket greens occupy the reserved inter-row gap, never sale plots or the road.
+ for(const park of scape.parks){
+  const green=new Graphics();green.label='street-park';
+  green.roundRect(park.x-park.w/2,park.y-park.d/2,park.w,park.d,30).fill({color:0x91a47b,alpha:.45});
+  green.moveTo(park.x-park.w/2+4,park.y+10).bezierCurveTo(park.x-80,park.y-26,park.x+30,park.y+26,park.x+park.w/2-4,park.y-7).stroke({color:0xd3cfb5,width:10,cap:'round'});
+  green.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));terrain.addChild(green);
+ }
+ for(const prop of scape.props){
+  if(prop.kind==='tree'){const p=this.iso(prop.x,prop.y);this.pack!.place(this.objects!,'tree-broadleaf',p.x,p.y,.85);}
+  else this.objects!.addChild(streetFurniture(prop));
+ }
+ // Short front-door approaches stop at the outer sidewalk, not on the asphalt.
+ for(const h of street.houses){
+  const p=lotPosition(h.lotIndex),upper=h.lotIndex%2===0,x=p.x+39;
+  const roadY=130+Math.floor(h.lotIndex/8)*360+10*Math.sin(Math.PI*(x+50)/610)**2;
+  const approach=new Graphics();approach.label='street-approach';
+  approach.moveTo(x,upper?p.y+68:p.y+2).lineTo(x,roadY+(upper?-25:25)).stroke({color:0xd1ccb3,width:7,cap:'butt'});
+  approach.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));terrain.addChild(approach);
+ }
  const occupied=new Set([...street.houses,...street.parking].map(h=>h.lotIndex));
  for(let i=0;i<=max;i++){
   const p=lotPosition(i);
