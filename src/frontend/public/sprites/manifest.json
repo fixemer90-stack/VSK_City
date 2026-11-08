@@ -556,7 +556,7 @@
       "title": "Золотой мост",
       "group": "centers",
       "sourceFile": "center-vladivostok.svg",
-      "file": "center-vladivostok.png?v=5759bda9bfc7",
+      "file": "center-vladivostok.png?v=5480f1542054",
       "width": 1212,
       "height": 701,
       "anchorX": 0.5,
@@ -567,11 +567,11 @@
         "width": 1212,
         "height": 701
       },
-      "paintedPixels": 370094,
+      "paintedPixels": 369885,
       "worldScale": 0.31,
       "pixelRatio": 2,
-      "sha256": "5759bda9bfc76fc755187f94ebcd316f5c09f24c559c508486c73e46829a49bf",
-      "sourceSha256": "a7c2c4d7037208477c9ed1e39217036bc99c1975107a1a0e0fe31ca1e500c46b"
+      "sha256": "5480f15420543dbc821c6544e9b4ef3c73f4b739e9819b46f120008fba1c897a",
+      "sourceSha256": "9ac01df046577e1de2d59a3cbd3ac7cb4abe5d600f1b77106065aab8dc70d869"
     },
     {
       "id": "center-generic",

@@ -1,7 +1,7 @@
 import {AfterViewInit,Component,ElementRef,EventEmitter,Input,OnChanges,OnDestroy,Output,ViewChild,signal} from '@angular/core';
 import {Application,Container,Graphics,Text,Polygon,Circle,Sprite,Matrix} from 'pixi.js';
 import {streetLayout} from './street-layout';
-import {cityNetwork} from './city-network';
+import {cityNetwork,CityNetwork} from './city-network';
 import {streetScape} from './streetscape';
 import {streetFurniture} from './street-furniture';
 import {City,Street,lotPosition,cityBlockPosition} from './model';
@@ -99,20 +99,24 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   // Keep exact geographic centers clickable even where a label crosses another marker.
   this.root.addChild(markerLayer);
  }
- private cityScene(city:City){this.layers();const network=cityNetwork(city.streets.length),{x,y,w,d}=network.bounds,ground=new Graphics();ground.label='city-grass';this.terrain!.addChild(ground);this.tile(ground,x,y,w,d,0xa8b68d);
+ private cityScene(city:City){this.layers();const kind=landmarkKind(city),network=cityNetwork(city.streets.length,kind),{x,y,w,d}=network.bounds,ground=new Graphics();ground.label='city-grass';this.terrain!.addChild(ground);
+  if(kind==='moscow')this.poly(ground,Array.from({length:192},(_,i)=>{const a=i*Math.PI/96,p=this.iso(485+w/2*Math.cos(a),505+d/2*Math.sin(a));return [p.x,p.y];}).flat(),0xa8b68d);
+  else this.tile(ground,x,y,w,d,0xa8b68d);
   const texture=new Graphics();texture.label='city-meadow-texture';texture.eventMode='none';
-  for(let yy=y+10;yy<y+d-10;yy+=21)for(let xx=x+10;xx<x+w-10;xx+=23){const seed=(Math.imul(xx,73856093)^Math.imul(yy,19349663))>>>0,p=this.iso(xx+seed%13,yy+(seed>>>8)%11);texture.moveTo(p.x-1.6,p.y).lineTo(p.x,p.y-1).lineTo(p.x+1.8,p.y);}
+  for(let yy=y+10;yy<y+d-10;yy+=21)for(let xx=x+10;xx<x+w-10;xx+=23){const seed=(Math.imul(xx,73856093)^Math.imul(yy,19349663))>>>0,wx=xx+seed%13,wy=yy+(seed>>>8)%11;if(kind==='moscow'&&Math.hypot(wx-485,wy-505)>w/2-5)continue;const p=this.iso(wx,wy);texture.moveTo(p.x-1.6,p.y).lineTo(p.x,p.y-1).lineTo(p.x+1.8,p.y);}
   texture.stroke({color:0x617a50,alpha:.14,width:.6});this.terrain!.addChild(texture);
+  if(network.river)this.cityRiver(network);
   const path=new Graphics();path.label='city-road';path.eventMode='none';
   // Two graph-wide passes: later sidewalk end caps must never cut pale seams
   // through an already painted asphalt connection.
   for(const inner of [false,true])for(const group of [26,18,5]){
-   for(const road of network.roads.filter(r=>r.width===group)){path.moveTo(road.points[0].x,road.points[0].y);for(const p of road.points.slice(1))path.lineTo(p.x,p.y);}
+   for(const road of network.roads.filter(r=>r.width===group&&!r.landmark)){path.moveTo(road.points[0].x,road.points[0].y);for(const p of road.points.slice(1))path.lineTo(p.x,p.y);}
    path.stroke({color:group===5?(inner?0xd8d3ba:0xd0ccb2):(inner?0x81908c:0xd1d0b8),width:group===5?(inner?5:7):(inner?group-6:group),cap:'round',join:'round'});
   }
   path.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));this.terrain!.addChild(path);
   // Permanent gardens use the reserved civic margin and outer green belt,
   // never the apparently empty cells that a later street can occupy.
+  if(kind==='generic'){
   const park=new Graphics();park.label='city-pocket-park';park.eventMode='none';
   park.ellipse(373,505,15,77).fill({color:0x8fa67b,alpha:.55});park.ellipse(1037,790,13,59).fill({color:0x8fa67b,alpha:.55});
   park.moveTo(373,377).bezierCurveTo(358,451,387,543,373,621).stroke({color:0xd4ceb3,width:4,cap:'round'});
@@ -120,9 +124,15 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
   park.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));this.terrain!.addChild(park);
   for(const [xx,yy] of [[373,437],[373,555],[1038,746],[1038,828],[-79,67],[-79,319],[-79,571],[1031,201],[1031,453],[1031,705],[125,-61],[375,-61],[625,-61],[875,-61],[117,957],[355,957],[593,957]]){const p=this.iso(xx,yy);this.pack!.place(this.objects!,'tree-broadleaf',p.x,p.y,.8);}
   for(const [kind,xx,yy] of [['bench',371,480],['flowerbed',1035,785],['lamp',1038,770],['bench',1038,811]] as const){const prop=streetFurniture({id:`city-${kind}-${xx}`,kind,x:xx,y:yy});prop.scale.set(.5);this.objects!.addChild(prop);}
+  }else if(kind==='moscow'){
+   for(let i=0;i<16;i++){const angle=i*Math.PI/8,p=this.iso(485+143*Math.cos(angle),505+143*Math.sin(angle));this.pack!.place(this.objects!,'tree-broadleaf',p.x,p.y,.65);}
+  }
   city.streets.forEach((s,i)=>{
-   const {x,y}=cityBlockPosition(i),cluster=new Container(),g=new Graphics(),start=this.objects!.children.length;cluster.label=`city-street-${i}`;cluster.addChild(g);
-   const access=network.access[i].point,approach=new Graphics();approach.label='city-frontage-path';approach.eventMode='none';approach.moveTo(x+48,y+77).lineTo(access.x,access.y-9).stroke({color:0xd4ceb3,width:4});approach.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));this.terrain!.addChild(approach);
+   const {x,y}=cityBlockPosition(i,kind),cluster=new Container(),g=new Graphics(),start=this.objects!.children.length;cluster.label=`city-street-${i}`;cluster.addChild(g);
+   const access=network.access[i].point,approach=new Graphics();approach.label='city-frontage-path';approach.eventMode='none';
+   if(kind==='moscow'){const dx=x+54.5-485,dy=y+52.5-505,r=Math.hypot(dx,dy);approach.moveTo(access.x,access.y).lineTo(access.x+dx/r*29,access.y+dy/r*29);}
+   else approach.moveTo(x+48,y+77).lineTo(access.x,access.y-9);
+   approach.stroke({color:0xd4ceb3,width:4});approach.setFromMatrix(new Matrix(1,.48,-1,.48,0,0));this.terrain!.addChild(approach);
    s.houses.slice(0,5).forEach((h,j)=>this.building(g,x+8+(j%3)*29,y+12+Math.floor(j/3)*32,h.tier,h.id,h.status==='pending_demolition',.49));
    s.parking.slice(0,1).forEach(p=>{const id=parkingSpriteId(p.spaces);if(id){const spot=this.iso(x+78,y+59);this.pack!.place(this.objects!,id,spot.x,spot.y,.4);}});
    this.tree(g,x+92,y+16);cluster.eventMode='static';cluster.cursor='pointer';
@@ -132,6 +142,35 @@ export class SceneComponent implements AfterViewInit,OnChanges,OnDestroy {
    if(s.name){const p=this.iso(x,y+103);const label=new Text({text:s.name,style:{fontSize:8,fill:0x36526a,fontFamily:'sans-serif'}});label.position.set(p.x,p.y+3);this.annotations!.addChild(label);}
   });
   const center=this.iso(485,505);this.pack!.place(this.objects!,`center-${landmarkKind(city)}` as SpriteId,center.x,center.y);
+ }
+ private cityRiver(network:CityNetwork){
+  const river=network.river!,project=new Matrix(1,.48,-1,.48,0,0),points=river.points;
+  const ribbon=(g:Graphics,half:number,color:number)=>g.poly([...points.map(p=>[p.x-half,p.y]),...[...points].reverse().map(p=>[p.x+half,p.y])].flat()).fill(color);
+  const green=new Graphics();green.label='city-river-gardens';ribbon(green,river.width/2+36,0x91a47b);green.setFromMatrix(project);this.terrain!.addChild(green);
+  const water=new Graphics();water.label='city-river';water.eventMode='none';ribbon(water,river.width/2,0x6498a4);water.setFromMatrix(project);this.terrain!.addChild(water);
+  const banks=new Graphics();banks.label='city-river-promenades';banks.eventMode='none';
+  for(const side of [-1,1]){
+   points.forEach((p,i)=>{const x=p.x+side*(river.width/2+8);if(i===0)banks.moveTo(x,p.y);else banks.lineTo(x,p.y);});banks.stroke({color:0xd7d0b7,width:12,join:'round'});
+   points.forEach((p,i)=>{const x=p.x+side*(river.width/2+1);if(i===0)banks.moveTo(x,p.y);else banks.lineTo(x,p.y);});banks.stroke({color:0x9c9e8b,width:2,join:'round'});
+  }
+  banks.setFromMatrix(project);this.terrain!.addChild(banks);
+  const ripples=new Graphics();ripples.label='city-river-reflections';
+  for(let i=4;i<points.length-3;i+=5){const p=points[i];if(p.y>403&&p.y<607)continue;const offset=(i%3-1)*13;ripples.moveTo(p.x+offset-6,p.y).quadraticCurveTo(p.x+offset,p.y+3,p.x+offset+8,p.y);}
+  ripples.stroke({color:0xc1ded9,alpha:.48,width:.8});ripples.setFromMatrix(project);this.terrain!.addChild(ripples);
+  for(const road of network.roads.filter(r=>r.role==='bridge'&&!r.landmark)){
+   const a=road.points[0],b=road.points.at(-1)!,shadow=new Graphics();shadow.label='city-bridge-shadow';shadow.moveTo(a.x,a.y+5).lineTo(b.x,b.y+5).stroke({color:0x314f59,alpha:.23,width:31});shadow.setFromMatrix(project);this.terrain!.addChild(shadow);
+   const anchor=this.iso((a.x+b.x)/2,a.y+13),rail=new Graphics();rail.label='city-bridge-rails';rail.eventMode='none';rail.position.set(anchor.x,anchor.y);
+   for(const side of [-1,1]){
+    const p=this.iso(a.x,a.y+side*12,5),q=this.iso(b.x,b.y+side*12,5);rail.moveTo(p.x-anchor.x,p.y-anchor.y).lineTo(q.x-anchor.x,q.y-anchor.y).stroke({color:0xeee4c9,width:1.6});
+    for(let x=a.x+6;x<b.x;x+=18){const p=this.iso(x,a.y+side*12),q=this.iso(x,a.y+side*12,5);rail.moveTo(p.x-anchor.x,p.y-anchor.y).lineTo(q.x-anchor.x,q.y-anchor.y);}
+    rail.stroke({color:0x6b7c77,width:1});
+   }
+   this.objects!.addChild(rail);
+  }
+  for(const y of [15,110,330,715,1010,1160]){
+   const p=points.reduce((a,b)=>Math.abs(a.y-y)<Math.abs(b.y-y)?a:b);
+   for(const side of [-1,1]){const x=p.x+side*63,q=this.iso(x,y);this.pack!.place(this.objects!,'tree-broadleaf',q.x,q.y,.7);const bench=streetFurniture({id:`quay-${side}-${y}`,kind:'bench',x:x-side*8,y:y+24});bench.scale.set(.5);this.objects!.addChild(bench);}
+  }
  }
  private streetScene(street:Street){this.layers();const g=new Graphics();this.terrain!.addChild(g);const max=Math.max(15,...street.houses.map(h=>h.lotIndex),...street.parking.map(p=>p.lotIndex)),rows=Math.floor(max/8)+1;
  const left=rows>2?-320:-140;

@@ -81,7 +81,7 @@ for(const [id,kind] of [['001','moscow'],['025','vladivostok'],['021','generic']
   let ground;
   for(let index=0;index<city.streets.length&&!ground;index++){
    const target=city.streets[index];if(target.houses.length||target.parking.length)continue;
-   const position=cityBlockPosition(index);
+   const position=cityBlockPosition(index,kind);
    for(const [dx,dy] of [[25,65],[45,60],[65,70]]){
     const wx=position.x+dx,wy=position.y+dy,x=tx+(wx-wy)*scale,y=ty+(wx+wy)*.48*scale;
     if(x>10&&y>10&&x<canvasBox.width-10&&y<canvasBox.height-10&&!groundView.some(item=>contains(item.bounds,x,y))){ground={x,y,target};break;}

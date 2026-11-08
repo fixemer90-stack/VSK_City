@@ -16,6 +16,8 @@ for(const [id,kind] of [['001','moscow'],['025','vladivostok'],['021','generic']
   expect(items.filter(i=>i.identity).map(i=>i.identity).sort()).toEqual(city.streets.flatMap(s=>s.houses.slice(0,5).map(h=>h.id)).sort());
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:info.outputPath(`${kind}-${width}-fit.png`),fullPage:true});
+  for(let n=0;n<3;n++)await page.getByRole('button',{name:'Приблизить',exact:true}).click();await settled(page);
+  expect(signature(await read(surface))).toEqual(initial);await page.screenshot({path:info.outputPath(`${kind}-${width}-closeup.png`),fullPage:true});
  }
  await page.setViewportSize({width:1440,height:960});await settled(page);await page.getByRole('button',{name:'Показать всю сцену',exact:true}).click();
  for(let n=0;n<3;n++)await page.getByRole('button',{name:'Приблизить',exact:true}).click();await settled(page);
@@ -23,15 +25,15 @@ for(const [id,kind] of [['001','moscow'],['025','vladivostok'],['021','generic']
  expect(writes).toEqual([]);expect(errors).toEqual([]);
 });
 
-test('all 50 city streets retain native visible-object or floor-polygon navigation without writes',async({page,request})=>{
+for(const [cityId,kind] of [['001','moscow'],['025','vladivostok']])test(`all 50 ${kind} streets retain native visible-object or floor-polygon navigation without writes`,async({page,request})=>{
  test.setTimeout(240_000);const writes=[],errors=[];page.on('request',r=>{if(!['GET','HEAD','OPTIONS'].includes(r.method()))writes.push(r.url());});page.on('pageerror',e=>errors.push(e.message));
- const response=await request.get('/api/demo/state?agentId=TEST-AGENT-001-044&role=agent');expect(response.ok()).toBe(true);const state=await response.json(),city=state.cities.find(c=>c.id==='TEST-CITY-001');expect(city.streets).toHaveLength(50);
+ const response=await request.get('/api/demo/state?agentId=TEST-AGENT-001-044&role=agent');expect(response.ok()).toBe(true);const state=await response.json(),city=state.cities.find(c=>c.id===`TEST-CITY-${cityId}`);expect(city.streets).toHaveLength(50);
  await page.goto('/');const surface=page.getByTestId('scene-surface');await expect(surface).toHaveAttribute('data-ready','true');const selected=[];
  for(let index=0;index<city.streets.length;index++){
-  const street=city.streets[index];await page.getByTestId('country-nav').click();await page.getByTestId(`city-${city.id}`).click();await expect(surface).toHaveAttribute('data-landmark','moscow');
+  const street=city.streets[index];await page.getByTestId('country-nav').click();await page.getByTestId(`city-${city.id}`).click();await expect(surface).toHaveAttribute('data-landmark',kind);
   const items=await read(surface),box=await surface.boundingBox(),a=items[0],b=items.find(i=>Math.abs(i.x-a.x)>100),scale=(b.screenX-a.screenX)/(b.x-a.x),tx=a.screenX-a.x*scale,ty=a.screenY-a.y*scale;
   const contains=(r,x,y)=>r&&x>=r.x&&x<=r.x+r.width&&y>=r.y&&y<=r.y+r.height;
-  const origin=cityBlockPosition(index);let point;
+  const origin=cityBlockPosition(index,kind);let point;
   for(const dy of [84,92,100,75,65,55])for(const dx of [48,24,72,12,96]){
    if(point)continue;const wx=origin.x+dx,wy=origin.y+dy,x=tx+(wx-wy)*scale,y=ty+(wx+wy)*.48*scale;
    if(x>8&&y>8&&x<box.width-8&&y<box.height-8&&!items.some(i=>contains(i.bounds,x,y)))point={x,y};

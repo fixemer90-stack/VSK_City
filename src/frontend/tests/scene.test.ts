@@ -107,7 +107,7 @@ for(const [name,centerId] of [['Москва','center-moscow'],['Владиво�
  assert.ok(items.slice(0,center).some(s=>s.label.startsWith('house-')));assert.ok(items.slice(center+1).some(s=>s.label.startsWith('house-')));
 });
 test('city has continuous landscaped ground and connected vector asphalt instead of grass panels and isolated road sprites',()=>{
- const {internal}=depthFixture();const c=city(),before=JSON.stringify(c);internal.cityScene(c);internal.render();
+ const {internal}=depthFixture();const c=city();c.name='Тула';const before=JSON.stringify(c);internal.cityScene(c);internal.render();
  const grass=internal.terrain.children.find((item:Container)=>item.label==='city-grass');
  assert.ok(grass instanceof Graphics,'one continuous city meadow replaces beige gaps');
  assert.equal(grass.context.instructions.filter((i:any)=>i.action==='fill').length,1);
@@ -121,9 +121,29 @@ test('city has continuous landscaped ground and connected vector asphalt instead
 });
 
 test('permanent city pocket gardens never occupy a current or appended street thumbnail',()=>{
- const {internal}=depthFixture();internal.cityScene(city());
+ const {internal}=depthFixture(),c=city();c.name='Тула';internal.cityScene(c);
  const park=internal.terrain.children.find((item:Container)=>item.label==='city-pocket-park') as Graphics;assert.ok(park);
  for(let i=0;i<64;i++){const p=cityBlockPosition(i);for(let dx=8;dx<=92;dx+=7)for(let dy=12;dy<=76;dy+=8)assert.equal(park.containsPoint({x:p.x+dx,y:p.y+dy}),false,`park cannot become a sales plot at street ${i}`);}
+});
+
+test('Vladivostok paints a continuous river with bank promenades and ground-sorted bridge rails around the existing landmark',()=>{
+ const {internal}=depthFixture(),c=city();c.name='Владивосток';internal.cityScene(c);internal.render();
+ const water=internal.terrain.children.find((item:Container)=>item.label==='city-river') as Graphics;assert.ok(water instanceof Graphics);
+ for(const y of [0,412,505,598,1100])assert.ok(water.containsPoint({x:485,y}),'real Pixi geometry, not only river metadata');
+ assert.ok(internal.terrain.children.some((item:Container)=>item.label==='city-river-promenades'));
+ const rails=internal.objects.children.filter((item:Container)=>item.label==='city-bridge-rails');assert.equal(rails.length,2);
+ for(const rail of rails){assert.ok(rail instanceof Graphics);assert.ok(rail.context.instructions.length>2);assert.equal(rail.zIndex,rail.y);}
+ assert.equal(sprites(internal.root).filter(s=>s.label==='center-vladivostok').length,1);
+});
+
+test('Moscow actually paints its concentric road geometry under the miniature blocks',()=>{
+ const {internal}=depthFixture();internal.cityScene(city());
+ const road=internal.terrain.children.find((item:Container)=>item.label==='city-road') as Graphics;
+ for(const radius of [180,360,540])for(let i=0;i<24;i++)assert.ok(road.containsPoint({x:485+radius*Math.cos(i*Math.PI/12),y:505+radius*Math.sin(i*Math.PI/12)}));
+ assert.equal(road.containsPoint({x:485,y:505}),false,'civic footprint stays road-free');
+ const grass=internal.terrain.children.find((item:Container)=>item.label==='city-grass') as Graphics;
+ assert.ok(grass.containsPoint({x:485-505,y:(485+505)*.48}));
+ assert.equal(grass.containsPoint({x:(485+700)-(505+700),y:(485+700+505+700)*.48}),false,'do not fit a huge empty square around the radial town');
 });
 
 test('city terrain and existing miniature anchors are invariant under occupancy, appending a street and camera transforms',()=>{
@@ -143,7 +163,7 @@ test('city flat objects retain owner clicks and polygon-only ground navigation; 
  assert.equal(internal.annotations.eventMode,'none');assert.equal(internal.annotations.children.length,3);
  const selected:string[]=[];scene.streetSelect.subscribe(s=>selected.push(s.id));
  for(let i=0;i<c.streets.length;i++){
-  const footprint=internal.terrain.children.find((item:Container)=>item.label===`city-street-${i}`) as Container;assert.ok(footprint.hitArea instanceof Polygon);const p=cityBlockPosition(i);
+  const footprint=internal.terrain.children.find((item:Container)=>item.label===`city-street-${i}`) as Container;assert.ok(footprint.hitArea instanceof Polygon);const p=cityBlockPosition(i,'moscow');
   assert.ok(footprint.hitArea.contains((p.x+50)-(p.y+50),(p.x+p.y+100)*.48));
   assert.equal(footprint.hitArea.contains((p.x-p.y),(p.x+p.y)*.48-20),false,'no elevated rectangle over adjacent streets');
   footprint.emit('pointertap');assert.equal(selected.pop(),c.streets[i].id);
@@ -224,12 +244,12 @@ test('returning to country clears destroyed depth layers and their metadata',()=
  const {scene,internal}=depthFixture();internal.cityScene(city());internal.render();scene.kind='country';internal.key='countryundefinedundefined';internal.app={render(){}};
  internal.draw();assert.deepEqual(JSON.parse(scene.surface.nativeElement.dataset['depthOrder']!),[]);assert.deepEqual(JSON.parse(scene.surface.nativeElement.dataset['sceneLayers']!),[]);assert.equal(scene.ready(),true);
 });
-test('flattening preserves existing world anchors and A/B identities in city and street projections',()=>{
+test('flattening preserves city-specific overview anchors, personal lot anchors and A/B identities',()=>{
  const cityView=depthFixture(),streetView=depthFixture(),c=city();cityView.internal.cityScene(c);cityView.internal.render();
  const cityData=JSON.parse(cityView.scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];
  const center=cityData.find(m=>m.sprite==='center-moscow')!;assert.equal(center.x,485-505);assert.equal(center.y,(485+505)*.48);
  for(let i=0;i<c.streets.length;i++){
-  const h=cityData.find(m=>m.identity===`house-${i}`)!;const p=cityBlockPosition(i);assert.equal(h.x,p.x+8+22*.49-(p.y+12+22*.49));assert.equal(h.y,((p.x+8+22*.49)+(p.y+12+22*.49))*.48);
+  const h=cityData.find(m=>m.identity===`house-${i}`)!;const p=cityBlockPosition(i,'moscow');assert.equal(h.x,p.x+8+22*.49-(p.y+12+22*.49));assert.equal(h.y,((p.x+8+22*.49)+(p.y+12+22*.49))*.48);
   assert.equal(h.streetId,c.streets[i].id);
  }
  streetView.internal.streetScene(c.streets[0]);streetView.internal.render();const streetData=JSON.parse(streetView.scene.surface.nativeElement.dataset['depthOrder']!) as DepthEntry[];

@@ -5,7 +5,7 @@ export interface Parking {id:string;lotIndex:number;spaces:number}
 export interface Street {id:string;agentId:string;name:string|null;scenario:string;houses:House[];parking:Parking[]}
 export interface City {id:string;name:string;mapX:number;mapY:number;streets:Street[]}
 export interface State {mode:string;version:number;rulesVersion?:number;now:string;viewer:{agentId:string;streetId:string;cityId:string;firstName:string;lastName:string;role:Role};cities:City[]}
-export function cityBlockPosition(index:number):{x:number;y:number} {let slot=index;for(const reserved of [27,28,35,36])if(slot>=reserved)slot++;return {x:(slot%8)*119,y:Math.floor(slot/8)*126};}
+export {cityBlockPosition} from './city-layout';
 export {streetLotPosition as lotPosition} from './street-layout';
 export function scenarioLabel(scenario:string):string {return ({empty:'Чистый лист',motor_only:'Автомобильный квартал',property_only:'Жилые дома',mixed:'Живой квартал',developed:'Развитая улица',skyscraper:'Высотный силуэт',overflow:'Город и парковки',large:'Большая улица',property_termination:'Отложенный снос',motor_termination:'Моторное изменение'} as Record<string,string>)[scenario] ?? scenario.replaceAll('_',' ');}
 export class ApiError extends Error {constructor(message:string,public uncertain=false){super(message)}}

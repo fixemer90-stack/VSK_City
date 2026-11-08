@@ -19,3 +19,13 @@ for(const [kind,groups] of Object.entries(details))test(`${kind}: authored archi
   assert.ok(svg.includes(`id="${match[1].slice(1)}"`),`unresolved local paint or symbol ${match[1]}`);
  }
 });
+
+test('Vladivostok inlet opens into the city river without a stone line or color seam across the water',async()=>{
+ const svg=await readFile(new URL('src/frontend/public/sprites/source/center-vladivostok.svg',root),'utf8');
+ assert.match(svg,/id="river-continuity"/);
+ assert.match(svg,/M20 350 115 395\.6 M225 448\.4 320 494 620 350/);
+ assert.match(svg,/M24 349 320 210 415 251\.6 M525 304\.4 616 349/);
+ assert.match(svg,/<polygon[^>]+fill="url\(#river-continuity\)"/);
+ assert.doesNotMatch(svg,/d="M20 350 320 494 620 350"/);
+ assert.doesNotMatch(svg,/d="M21 350 320 493 619 350"|d="M29 350 320 489 611 350"/,'late landscape highlights must also leave the inlet open');
+});
